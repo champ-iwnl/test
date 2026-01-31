@@ -15,7 +15,7 @@ module.exports = {
         'mobile': '300px',
       },
       fontFamily: {
-        'prompt': ['Prompt', 'sans-serif'],
+        'kanit': ['Kanit', 'sans-serif'],
       },
     },
   },
