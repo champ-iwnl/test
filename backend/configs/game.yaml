@@ -1,0 +1,27 @@
+# Game Configuration
+# All game-related settings are configurable here
+
+game:
+  spin:
+    # Maximum spins allowed per player per day
+    max_daily_spins: 10
+
+    # Weighted distribution for spin results
+    # Weight = probability (total weights don't need to sum to 100)
+    distribution:
+      - points: 300
+        weight: 40
+      - points: 500
+        weight: 35
+      - points: 1000
+        weight: 20
+      - points: 3000
+        weight: 5
+
+  # Points required for each reward checkpoint
+  reward_checkpoints:
+    - 500
+    - 1500
+    - 3000
+    - 5000
+    - 10000

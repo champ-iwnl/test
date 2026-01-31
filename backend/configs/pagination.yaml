@@ -1,0 +1,11 @@
+# Pagination Configuration
+
+pagination:
+  # Default number of items per page
+  default_limit: 20
+
+  # Maximum allowed items per page
+  max_limit: 100
+
+  # Default offset
+  default_offset: 0
