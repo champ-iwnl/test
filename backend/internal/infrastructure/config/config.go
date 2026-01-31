@@ -33,6 +33,8 @@ type DBConfig struct {
 type ServerConfig struct {
 	Port int
 	Env  string
+	// AllowOrigins is a comma-separated list of CORS allowed origins (e.g. "http://localhost:3000,http://127.0.0.1:3000")
+	AllowOrigins string `mapstructure:"allow_origins"`
 }
 
 type LogConfig struct {
@@ -138,8 +140,9 @@ func Init() *Config {
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
 		Server: ServerConfig{
-			Port: getEnvInt("SERVER_PORT", 3000),
-			Env:  getEnv("SERVER_ENV", "development"),
+			Port:         getEnvInt("SERVER_PORT", 3000),
+			Env:          getEnv("SERVER_ENV", "development"),
+			AllowOrigins: getEnv("CORS_ALLOW_ORIGINS", "http://localhost:3000"),
 		},
 		Log: LogConfig{
 			Level: getEnv("LOG_LEVEL", "info"),

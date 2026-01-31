@@ -12,18 +12,25 @@ export interface EnterRequest {
 export interface Player {
   id: string
   nickname: string
-  points: number
+  total_points: number
   created_at?: string
   updated_at?: string
 }
 
 export interface EnterResponse {
-  player: Player
-  message: string
+  id: string
+  nickname: string
+  total_points: number
+  created_at: string
+  is_new?: boolean
 }
 
 export interface ProfileResponse {
-  player: Player
+  id: string
+  nickname: string
+  total_points: number
+  created_at: string
+  claimed_checkpoints: number[]
 }
 
 // History

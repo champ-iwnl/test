@@ -52,7 +52,13 @@ export function NicknameForm({
   const enterMutation = useMutation({
     mutationFn: (data: NicknameFormData) => authService.enter(data.nickname),
     onSuccess: (data) => {
-      setPlayer(data.player)
+      // Backend returns flat EnterResponse, map to Player shape used in store
+      setPlayer({
+        id: data.id,
+        nickname: data.nickname,
+        total_points: data.total_points,
+        created_at: data.created_at,
+      })
       router.push('/home')
     },
     onError: (error: any) => {

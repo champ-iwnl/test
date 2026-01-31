@@ -23,7 +23,7 @@ export const usePlayerStore = create<PlayerState>()(
       updatePoints: (points) => 
         set((state) => ({
           player: state.player 
-            ? { ...state.player, points } 
+            ? { ...state.player, total_points: points } 
             : null
         })),
 

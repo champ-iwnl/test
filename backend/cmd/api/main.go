@@ -10,6 +10,7 @@ import (
 	"backend/internal/infrastructure/database"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
@@ -59,6 +60,13 @@ func main() {
 
 	// Create Fiber app
 	app := fiber.New()
+
+	// Enable CORS for frontend origin(s)
+	// Enable CORS for frontend origin(s) (configurable via CORS_ALLOW_ORIGINS)
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     cfg.Server.AllowOrigins,
+		AllowCredentials: true,
+	}))
 
 	// Middleware
 	app.Use(logger.New())
