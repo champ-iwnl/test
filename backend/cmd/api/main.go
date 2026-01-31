@@ -18,11 +18,21 @@ func main() {
 	cfg := config.Init()
 
 	// Initialize database
-	db := database.New(cfg)
-	defer db.Close()
+	db, err := database.New(&cfg.DB)
+	if err != nil {
+		log.Fatalf("Database connection failed: %v", err)
+	}
+	defer func() {
+		sqlDB, _ := db.DB().DB()
+		sqlDB.Close()
+	}()
 
 	// Ping database to verify connection
-	if err := db.Ping(); err != nil {
+	sqlDB, err := db.DB().DB()
+	if err != nil {
+		log.Fatalf("Failed to get sql.DB: %v", err)
+	}
+	if err := sqlDB.Ping(); err != nil {
 		log.Fatalf("Database ping failed: %v", err)
 	}
 	log.Println("✓ Database connected successfully")
