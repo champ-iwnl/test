@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	_ "backend/docs" // This is required for swagger
 	"backend/internal/adapter/http/routes"
 	"backend/internal/infrastructure/config"
 	"backend/internal/infrastructure/database"
@@ -12,6 +13,25 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
+
+// @title Spin Head API
+// @version 1.0
+// @description A spin game API built with Go and Fiber
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:3001
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 
 func main() {
 	// Load configuration from .env in current directory

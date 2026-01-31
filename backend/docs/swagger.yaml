@@ -1,0 +1,128 @@
+basePath: /
+definitions:
+  application.EnterRequest:
+    properties:
+      nickname:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - nickname
+    type: object
+  application.EnterResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      is_new:
+        description: Only for enter
+        type: boolean
+      nickname:
+        type: string
+      total_points:
+        type: integer
+    type: object
+  application.ProfileResponse:
+    properties:
+      claimed_checkpoints:
+        description: Phase 6
+        items:
+          type: integer
+        type: array
+      created_at:
+        type: string
+      id:
+        type: string
+      nickname:
+        type: string
+      total_points:
+        type: integer
+    type: object
+host: localhost:3001
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: A spin game API built with Go and Fiber
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Spin Head API
+  version: "1.0"
+paths:
+  /players/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get player profile information by player ID
+      parameters:
+      - description: Player ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Player profile
+          schema:
+            $ref: '#/definitions/application.ProfileResponse'
+        "400":
+          description: Bad request
+          schema:
+            type: object
+        "404":
+          description: Player not found
+          schema:
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            type: object
+      summary: Get player profile
+      tags:
+      - Players
+  /players/enter:
+    post:
+      consumes:
+      - application/json
+      description: Enter an existing player or create a new one with the given nickname
+      parameters:
+      - description: Player enter request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/application.EnterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Existing player found
+          schema:
+            $ref: '#/definitions/application.EnterResponse'
+        "201":
+          description: New player created
+          schema:
+            $ref: '#/definitions/application.EnterResponse'
+        "400":
+          description: Bad request
+          schema:
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            type: object
+      summary: Enter or resume a player
+      tags:
+      - Players
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

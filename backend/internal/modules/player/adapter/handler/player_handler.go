@@ -24,6 +24,17 @@ func NewPlayerHandler(enterUC *enter.UseCase, getProfileUC *get_profile.UseCase)
 }
 
 // Enter handles POST /players/enter
+// @Summary Enter or resume a player
+// @Description Enter an existing player or create a new one with the given nickname
+// @Tags Players
+// @Accept json
+// @Produce json
+// @Param request body application.EnterRequest true "Player enter request"
+// @Success 200 {object} application.EnterResponse "Existing player found"
+// @Success 201 {object} application.EnterResponse "New player created"
+// @Failure 400 {object} object "Bad request"
+// @Failure 500 {object} object "Internal server error"
+// @Router /players/enter [post]
 func (h *PlayerHandler) Enter(c *fiber.Ctx) error {
 	// Parse request body
 	var req application.EnterRequest
@@ -47,6 +58,17 @@ func (h *PlayerHandler) Enter(c *fiber.Ctx) error {
 }
 
 // GetProfile handles GET /players/:id
+// @Summary Get player profile
+// @Description Get player profile information by player ID
+// @Tags Players
+// @Accept json
+// @Produce json
+// @Param id path string true "Player ID"
+// @Success 200 {object} application.ProfileResponse "Player profile"
+// @Failure 400 {object} object "Bad request"
+// @Failure 404 {object} object "Player not found"
+// @Failure 500 {object} object "Internal server error"
+// @Router /players/{id} [get]
 func (h *PlayerHandler) GetProfile(c *fiber.Ctx) error {
 	// Parse player ID from URL
 	playerID := c.Params("id")

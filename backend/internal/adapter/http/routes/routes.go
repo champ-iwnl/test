@@ -5,6 +5,7 @@ import (
 	"backend/internal/modules/player"
 
 	"github.com/gofiber/fiber/v2"
+	fiberSwagger "github.com/swaggo/fiber-swagger"
 	"gorm.io/gorm"
 )
 
@@ -33,6 +34,9 @@ func Setup(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 			"architecture": "Full DDD + Clean Architecture",
 		})
 	})
+
+	// Swagger documentation
+	app.Get("/swagger/*", fiberSwagger.WrapHandler)
 
 	// Initialize modules
 	playerModule := player.NewModule(db, cfg)
