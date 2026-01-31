@@ -23,21 +23,20 @@ func main() {
 	cfg := config.Init()
 
 	// Initialize database connection
-	db, err := database.New(cfg.Database)
+	db, err := database.New(&cfg.DB)
 	if err != nil {
 		log.Fatalf("[Migrate] Failed to connect to database: %v", err)
 	}
 	defer func() {
-		sqlDB, _ := db.DB()
+		sqlDB, _ := db.DB().DB()
 		sqlDB.Close()
 	}()
 
 	// Create migrator
-	migrator, err := migrations.NewMigrator(db, cfg)
+	migrator, err := migrations.NewMigrator(db.DB(), cfg)
 	if err != nil {
 		log.Fatalf("[Migrate] Failed to create migrator: %v", err)
 	}
-	defer migrator.Close()
 
 	// Execute command
 	switch command {
@@ -60,7 +59,7 @@ func main() {
 		log.Println("[Migrate] ✓ Database reset completed successfully")
 
 	case "seed":
-		seeder := migrations.NewSeeder(db, cfg)
+		seeder := migrations.NewSeeder(db.DB(), cfg)
 		if err := seeder.SeedAll(context.Background()); err != nil {
 			log.Fatalf("[Migrate] Seed failed: %v", err)
 		}

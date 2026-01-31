@@ -4,43 +4,55 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/spinhead/api/internal/infrastructure/config"
+	"backend/internal/infrastructure/config"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type Database struct {
-	*gorm.DB
+	db *gorm.DB
 }
 
-func New(cfg *config.Config) *Database {
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		cfg.DB.Host,
-		cfg.DB.Port,
-		cfg.DB.User,
-		cfg.DB.Password,
-		cfg.DB.Name,
-		cfg.DB.SSLMode,
-	)
+func New(cfg *config.DBConfig) (*Database, error) {
+	dsn := cfg.GetDSN()
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+	log.Printf("[Database] Connecting to PostgreSQL: %s:%d/%s", cfg.Host, cfg.Port, cfg.Database)
+
+	// Configure GORM logger
+	gormLogger := logger.Default
+	if cfg.SSLMode == "require" {
+		gormLogger = logger.Default.LogMode(logger.Silent) // Reduce log noise in production
 	}
 
-	return &Database{db}
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: gormLogger,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to database: %w", err)
+	}
+
+	// Test the connection
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get underlying sql.DB: %w", err)
+	}
+
+	if err := sqlDB.Ping(); err != nil {
+		return nil, fmt.Errorf("failed to ping database: %w", err)
+	}
+
+	log.Println("[Database] ✓ Connected to PostgreSQL successfully")
+	return &Database{db: db}, nil
 }
 
-func (d *Database) Ping() error {
-	sqlDB, err := d.DB.DB()
-	if err != nil {
-		return err
-	}
-	return sqlDB.Ping()
+func (d *Database) DB() *gorm.DB {
+	return d.db
 }
 
 func (d *Database) Close() error {
-	sqlDB, err := d.DB.DB()
+	sqlDB, err := d.db.DB()
 	if err != nil {
 		return err
 	}

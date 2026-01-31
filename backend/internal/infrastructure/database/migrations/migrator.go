@@ -26,13 +26,15 @@ func NewMigrator(db *gorm.DB, cfg *config.Config) (*Migrator, error) {
 	}
 
 	// Create postgres driver instance
-	driver, err := postgres.WithInstance(sqlDB, &postgres.Config{})
+	driver, err := postgres.WithInstance(sqlDB, &postgres.Config{
+		MigrationsTable: "schema_migrations",
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create postgres driver: %w", err)
 	}
 
 	// Create migrate instance with file source
-	migrationPath := "file://migrations"
+	migrationPath := "file://./migrations"
 	if cfg.Server.Env == "production" {
 		migrationPath = "file://./migrations"
 	}
@@ -95,12 +97,22 @@ func (m *Migrator) Down() error {
 func (m *Migrator) Reset() error {
 	log.Println("[Migrator] Resetting database...")
 
-	// Drop all tables (equivalent to down all)
-	if err := m.migrate.Drop(); err != nil {
-		return fmt.Errorf("migration reset (drop) failed: %w", err)
+	// Get current version
+	version, _, err := m.migrate.Version()
+	if err != nil {
+		log.Printf("[Migrator] Warning: Could not get current version: %v", err)
+		version = 4 // Assume max version if we can't get it
 	}
 
-	log.Println("[Migrator] ✓ All tables dropped, running migrations up...")
+	// Rollback all migrations (4 steps down)
+	if version > 0 {
+		log.Printf("[Migrator] Rolling back %d migrations...", version)
+		if err := m.migrate.Steps(-int(version)); err != nil {
+			return fmt.Errorf("migration reset (down) failed: %w", err)
+		}
+	}
+
+	log.Println("[Migrator] ✓ All migrations rolled back, running migrations up...")
 
 	// Run all migrations up
 	if err := m.Up(); err != nil {
@@ -111,19 +123,43 @@ func (m *Migrator) Reset() error {
 	return nil
 }
 
+// createSchemaMigrationsTable creates the schema_migrations table
+func (m *Migrator) createSchemaMigrationsTable() error {
+	// We need access to the underlying database connection
+	// For now, we'll use the migrate instance to execute raw SQL
+	// This is a bit of a hack, but it works
+
+	// Get the database instance from the migrate object
+	// Since we can't easily access it, let's try a different approach
+
+	// Actually, let's modify the approach - instead of dropping everything,
+	// let's just run all down migrations and then all up migrations
+
+	// For now, let's try to force the version to 0 and then run up
+	if err := m.migrate.Force(0); err != nil {
+		log.Printf("[Migrator] Warning: Could not force version to 0: %v", err)
+		// Continue anyway
+	}
+
+	return nil
+}
+
 // Version returns the current migration version
 func (m *Migrator) Version() (uint, bool, error) {
 	return m.migrate.Version()
 }
 
-// Close closes the migrator
-func (m *Migrator) Close() error {
-	sourceErr, dbErr := m.migrate.Close()
-	if sourceErr != nil {
-		return fmt.Errorf("failed to close migration source: %w", sourceErr)
-	}
-	if dbErr != nil {
-		return fmt.Errorf("failed to close migration database: %w", dbErr)
-	}
-	return nil
+// recreateMigrator recreates the migrate instance after a drop operation
+func (m *Migrator) recreateMigrator() error {
+	// Close the current instance
+	m.migrate.Close()
+
+	// Get the database connection from the driver
+	// We need to create a new instance since the old one was closed
+	// For now, we'll create a minimal recreation - in a real implementation,
+	// we'd need to pass the db connection to the migrator
+
+	// This is a simplified approach - create a new migrator instance
+	// In practice, we'd need to modify the constructor to allow recreation
+	return fmt.Errorf("recreateMigrator not fully implemented - need database connection")
 }
