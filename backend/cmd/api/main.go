@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"log"
 
+	"backend/internal/adapter/http/routes"
+	"backend/internal/infrastructure/config"
+	"backend/internal/infrastructure/database"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
-	"github.com/spinhead/api/internal/adapter/http/routes"
-	"github.com/spinhead/api/internal/infrastructure/config"
-	"github.com/spinhead/api/internal/infrastructure/database"
 )
 
 func main() {

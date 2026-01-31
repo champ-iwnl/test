@@ -1,0 +1,17 @@
+rewards:
+  checkpoints:
+    - checkpoint_val: 500
+      reward_name: "Bronze Reward"
+      reward_description: "Congratulations! You've earned 500 points."
+    - checkpoint_val: 1500
+      reward_name: "Silver Reward"
+      reward_description: "Amazing! You've reached 1500 points."
+    - checkpoint_val: 3000
+      reward_name: "Gold Reward"
+      reward_description: "Incredible! You've hit 3000 points."
+    - checkpoint_val: 5000
+      reward_name: "Platinum Reward"
+      reward_description: "Outstanding! You've achieved 5000 points."
+    - checkpoint_val: 10000
+      reward_name: "Diamond Reward"
+      reward_description: "Legendary! You've conquered 10000 points."
