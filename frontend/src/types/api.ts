@@ -42,8 +42,22 @@ export interface SpinLog {
   created_at: string
 }
 
+export interface PersonalSpinLog {
+  id: string
+  points_gained: number
+  source: string
+  created_at: string
+}
+
 export interface GlobalHistoryResponse {
   data: SpinLog[]
+  total: number
+  limit: number
+  offset: number
+}
+
+export interface PersonalHistoryResponse {
+  data: PersonalSpinLog[]
   total: number
   limit: number
   offset: number
@@ -58,6 +72,18 @@ export interface ClaimResponse {
   success: boolean
   message: string
   points_claimed: number
+}
+
+export interface RewardHistoryItem {
+  id: string
+  checkpoint_val: number
+  reward_name: string
+  reward_description: string
+  claimed_at: string
+}
+
+export interface RewardHistoryResponse {
+  data: RewardHistoryItem[]
 }
 
 // Game
