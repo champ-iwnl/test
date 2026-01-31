@@ -1,5 +1,26 @@
 basePath: /
 definitions:
+  application.ClaimRequest:
+    properties:
+      checkpoint_val:
+        type: integer
+      player_id:
+        type: string
+    required:
+    - checkpoint_val
+    - player_id
+    type: object
+  application.ClaimResponse:
+    properties:
+      checkpoint_val:
+        type: integer
+      claimed_at:
+        type: string
+      id:
+        type: string
+      reward_name:
+        type: string
+    type: object
   application.EnterRequest:
     properties:
       nickname:
@@ -22,6 +43,13 @@ definitions:
         type: string
       total_points:
         type: integer
+    type: object
+  application.GetHistoryResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/application.RewardHistoryDTO'
+        type: array
     type: object
   application.GlobalHistoryResponse:
     properties:
@@ -89,6 +117,49 @@ definitions:
       total_points:
         type: integer
     type: object
+  application.RewardHistoryDTO:
+    properties:
+      checkpoint_val:
+        type: integer
+      claimed_at:
+        type: string
+      id:
+        type: string
+      reward_description:
+        type: string
+      reward_name:
+        type: string
+    type: object
+  application.SpinErrorResponse:
+    properties:
+      code:
+        example: DAILY_LIMIT_EXCEEDED
+        type: string
+      message:
+        example: Daily spin limit reached
+        type: string
+      remaining_spins:
+        example: 0
+        type: integer
+    type: object
+  application.SpinRequest:
+    properties:
+      player_id:
+        example: uuid-123
+        type: string
+    type: object
+  application.SpinResponse:
+    properties:
+      points_gained:
+        example: 500
+        type: integer
+      spin_id:
+        example: uuid-456
+        type: string
+      total_points_after:
+        example: 1500
+        type: integer
+    type: object
 host: localhost:3001
 info:
   contact:
@@ -103,6 +174,44 @@ info:
   title: Spin Head API
   version: "1.0"
 paths:
+  /game/spin:
+    post:
+      consumes:
+      - application/json
+      description: Perform a spin for the player (max 10 spins/day)
+      parameters:
+      - description: Spin request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/application.SpinRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/application.SpinResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/application.SpinErrorResponse'
+        "404":
+          description: Player not found
+          schema:
+            $ref: '#/definitions/application.SpinErrorResponse'
+        "429":
+          description: Daily limit exceeded
+          schema:
+            $ref: '#/definitions/application.SpinErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/application.SpinErrorResponse'
+      summary: Execute a spin
+      tags:
+      - Game
   /history/{player_id}:
     get:
       consumes:
@@ -247,6 +356,73 @@ paths:
       summary: Enter or resume a player
       tags:
       - Players
+  /rewards/{player_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get all rewards claimed by a player
+      parameters:
+      - description: Player ID
+        in: path
+        name: player_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/application.GetHistoryResponse'
+        "400":
+          description: Invalid player ID
+          schema:
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            type: object
+      summary: Get reward claim history
+      tags:
+      - Rewards
+  /rewards/claim:
+    post:
+      consumes:
+      - application/json
+      description: Claim a reward when player reaches a checkpoint
+      parameters:
+      - description: Claim reward request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/application.ClaimRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/application.ClaimResponse'
+        "400":
+          description: Insufficient points or invalid checkpoint
+          schema:
+            type: object
+        "404":
+          description: Player not found
+          schema:
+            type: object
+        "409":
+          description: Already claimed
+          schema:
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            type: object
+      summary: Claim reward at checkpoint
+      tags:
+      - Rewards
 securityDefinitions:
   ApiKeyAuth:
     in: header

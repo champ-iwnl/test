@@ -3,6 +3,7 @@ package get_profile
 import (
 	"backend/internal/modules/player/application"
 	"backend/internal/modules/player/domain"
+	rewarddomain "backend/internal/modules/reward/domain"
 	shared "backend/internal/shared/domain"
 	"context"
 	"errors"
@@ -10,13 +11,14 @@ import (
 
 // UseCase handles get player profile
 type UseCase struct {
-	playerRepo domain.PlayerRepository
-	// rewardRepo will be added in Phase 6
+	playerRepo   domain.PlayerRepository
+	rewardTxRepo interface{}
 }
 
-func New(repo domain.PlayerRepository) *UseCase {
+func New(repo domain.PlayerRepository, rewardTxRepo interface{}) *UseCase {
 	return &UseCase{
-		playerRepo: repo,
+		playerRepo:   repo,
+		rewardTxRepo: rewardTxRepo,
 	}
 }
 
@@ -42,13 +44,21 @@ func (uc *UseCase) Execute(ctx context.Context, req application.GetProfileReques
 		return nil, err
 	}
 
-	// TODO: In Phase 6, add claimed checkpoints from rewardRepo
+	// Get claimed checkpoints
+	claimedCheckpoints := []int{}
+	if uc.rewardTxRepo != nil {
+		if repo, ok := uc.rewardTxRepo.(rewarddomain.RewardTransactionRepository); ok {
+			if checkpoints, err := repo.GetClaimedCheckpoints(ctx, req.PlayerID); err == nil {
+				claimedCheckpoints = checkpoints
+			}
+		}
+	}
 
 	return &application.ProfileResponse{
 		ID:                 player.ID().String(),
 		Nickname:           player.Nickname().String(),
 		TotalPoints:        player.TotalPoints().Value(),
 		CreatedAt:          player.CreatedAt(),
-		ClaimedCheckpoints: []int{}, // Phase 6: will be populated from rewardRepo
+		ClaimedCheckpoints: claimedCheckpoints,
 	}, nil
 }

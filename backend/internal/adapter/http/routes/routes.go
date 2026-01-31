@@ -2,8 +2,10 @@ package routes
 
 import (
 	"backend/internal/infrastructure/config"
+	"backend/internal/modules/game"
 	"backend/internal/modules/history"
 	"backend/internal/modules/player"
+	"backend/internal/modules/reward"
 
 	"github.com/gofiber/fiber/v2"
 	fiberSwagger "github.com/swaggo/fiber-swagger"
@@ -39,7 +41,28 @@ func Setup(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	// Swagger documentation
 	app.Get("/swagger/*", fiberSwagger.WrapHandler)
 
-	// Initialize modules
-	playerModule := player.NewModule(db, cfg)
+	// Initialize modules (order matters for dependency injection)
+	playerModule := player.NewModule(db, cfg, nil)
+	historyModule := history.NewModule(db, cfg)
+	rewardModule := reward.NewModule(db, cfg, playerModule.PlayerRepo)
+
+	// Initialize game module (needs player and spin log repos)
+	sqlDB, err := db.DB()
+	if err != nil {
+		panic("Failed to get SQL DB: " + err.Error())
+	}
+	gameModule, err := game.NewModule(cfg, sqlDB, playerModule.PlayerRepo, historyModule.SpinLogRepo)
+	if err != nil {
+		panic("Failed to initialize game module: " + err.Error())
+	}
+
+	// Register routes
 	playerModule.RegisterRoutes(app)
+	historyModule.RegisterRoutes(app)
+	rewardModule.RegisterRoutes(app)
+	gameModule.RegisterRoutes(app)
+
+	// Update player module with reward repository for profile
+	playerModuleWithRewards := player.NewModule(db, cfg, rewardModule.RewardTxRepo)
+	playerModuleWithRewards.RegisterRoutes(app)
 }

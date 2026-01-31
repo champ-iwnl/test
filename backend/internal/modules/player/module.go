@@ -14,10 +14,11 @@ import (
 
 // Module wires all player dependencies
 type Module struct {
-	Handler *handler.PlayerHandler
+	Handler    *handler.PlayerHandler
+	PlayerRepo domain.PlayerRepository
 }
 
-func NewModule(db *gorm.DB, cfg *config.Config) *Module {
+func NewModule(db *gorm.DB, cfg *config.Config, rewardTxRepo interface{}) *Module {
 	// Create factory with config
 	factory := domain.NewPlayerFactory(
 		cfg.Validation.Nickname.MinLength,
@@ -29,12 +30,13 @@ func NewModule(db *gorm.DB, cfg *config.Config) *Module {
 
 	// Create usecases
 	enterUC := enter.New(repo, factory)
-	getProfileUC := get_profile.New(repo)
-
-	// Create handler
+	getProfileUC := get_profile.New(repo, rewardTxRepo)
 	h := handler.NewPlayerHandler(enterUC, getProfileUC)
 
-	return &Module{Handler: h}
+	return &Module{
+		Handler:    h,
+		PlayerRepo: repo,
+	}
 }
 
 func (m *Module) RegisterRoutes(app *fiber.App) {

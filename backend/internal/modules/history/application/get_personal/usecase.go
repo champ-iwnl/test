@@ -26,7 +26,11 @@ func (uc *UseCase) Execute(ctx context.Context, req application.GetPersonalReque
 		return nil, errors.New("player ID is required")
 	}
 
-	params := shared.NewPaginationParams(req.Limit, req.Offset, *uc.paginationCfg)
+	params := shared.NewPaginationParams(req.Limit, req.Offset, shared.PaginationConfig{
+		DefaultLimit:  uc.paginationCfg.DefaultLimit,
+		MaxLimit:      uc.paginationCfg.MaxLimit,
+		DefaultOffset: uc.paginationCfg.DefaultOffset,
+	})
 	result, err := uc.spinLogRepo.ListByPlayer(ctx, req.PlayerID, params)
 	if err != nil {
 		return nil, err

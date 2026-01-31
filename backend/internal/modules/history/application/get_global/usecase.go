@@ -21,7 +21,11 @@ func New(repo domain.SpinLogRepository, cfg *config.PaginationConfig) *UseCase {
 }
 
 func (uc *UseCase) Execute(ctx context.Context, req application.GetGlobalRequest) (*application.GlobalHistoryResponse, error) {
-	params := shared.NewPaginationParams(req.Limit, req.Offset, *uc.paginationCfg)
+	params := shared.NewPaginationParams(req.Limit, req.Offset, shared.PaginationConfig{
+		DefaultLimit:  uc.paginationCfg.DefaultLimit,
+		MaxLimit:      uc.paginationCfg.MaxLimit,
+		DefaultOffset: uc.paginationCfg.DefaultOffset,
+	})
 	result, err := uc.spinLogRepo.ListAll(ctx, params)
 	if err != nil {
 		return nil, err
