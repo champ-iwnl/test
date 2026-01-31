@@ -1,0 +1,7 @@
+# Validation Configuration
+# Input validation rules
+
+validation:
+  nickname:
+    min_length: 3
+    max_length: 50

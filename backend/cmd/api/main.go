@@ -45,7 +45,7 @@ func main() {
 	app.Use(recover.New())
 
 	// Setup routes
-	routes.Setup(app)
+	routes.Setup(app, db.DB(), cfg)
 
 	// Start server
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)

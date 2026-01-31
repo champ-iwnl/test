@@ -18,6 +18,7 @@ type Config struct {
 	Game       GameConfig
 	Pagination PaginationConfig
 	Rewards    RewardsConfig
+	Validation ValidationConfig
 }
 
 type DBConfig struct {
@@ -46,6 +47,15 @@ type CheckpointItem struct {
 	CheckpointVal     int    `mapstructure:"checkpoint_val"`
 	RewardName        string `mapstructure:"reward_name"`
 	RewardDescription string `mapstructure:"reward_description"`
+}
+
+type ValidationConfig struct {
+	Nickname NicknameValidationConfig `mapstructure:"nickname"`
+}
+
+type NicknameValidationConfig struct {
+	MinLength int `mapstructure:"min_length"`
+	MaxLength int `mapstructure:"max_length"`
 }
 
 var config *Config
@@ -109,6 +119,14 @@ func Init() *Config {
 		log.Printf("[Config] ✓ Loaded rewards config")
 	}
 
+	// Load validation configuration from YAML
+	viper.SetConfigName("validation")
+	if err := viper.MergeInConfig(); err != nil {
+		log.Printf("[Config] Warning: Could not load validation.yaml: %v", err)
+	} else {
+		log.Printf("[Config] ✓ Loaded validation config")
+	}
+
 	// Read from environment variables
 	cfg := &Config{
 		DB: DBConfig{
@@ -141,6 +159,11 @@ func Init() *Config {
 	// Load rewards config
 	if err := viper.UnmarshalKey("rewards", &cfg.Rewards); err != nil {
 		log.Printf("[Config] Warning: Could not unmarshal rewards config: %v", err)
+	}
+
+	// Load validation config
+	if err := viper.UnmarshalKey("validation", &cfg.Validation); err != nil {
+		log.Printf("[Config] Warning: Could not unmarshal validation config: %v", err)
 	}
 
 	// Validate configuration

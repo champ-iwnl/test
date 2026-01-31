@@ -1,10 +1,14 @@
 package routes
 
 import (
+	"backend/internal/infrastructure/config"
+	"backend/internal/modules/player"
+
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
-func Setup(app *fiber.App) {
+func Setup(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	// Health check
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
@@ -29,4 +33,8 @@ func Setup(app *fiber.App) {
 			"architecture": "Full DDD + Clean Architecture",
 		})
 	})
+
+	// Initialize modules
+	playerModule := player.NewModule(db, cfg)
+	playerModule.RegisterRoutes(app)
 }
