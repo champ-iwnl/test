@@ -3,6 +3,8 @@
 *.dll
 *.so
 *.dylib
+/bin
+/dist
 
 # IDE
 .vscode/
@@ -12,12 +14,14 @@
 *~
 .DS_Store
 
-# Frontend
-node_modules/
-dist/
-build/
-.next/
-out/
+# Go
+go.sum
+vendor/
+
+# Env
+.env
+.env.local
+.env.*.local
 
 # Logs
 *.log
@@ -25,7 +29,3 @@ out/
 # OS
 .DS_Store
 Thumbs.db
-
-# Backend build
-backend/bin/
-backend/dist/
