@@ -23,6 +23,56 @@ definitions:
       total_points:
         type: integer
     type: object
+  application.GlobalHistoryResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/application.GlobalSpinLogDTO'
+        type: array
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+    type: object
+  application.GlobalSpinLogDTO:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      player_nickname:
+        type: string
+      points_gained:
+        type: integer
+      source:
+        type: string
+    type: object
+  application.PersonalHistoryResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/application.PersonalSpinLogDTO'
+        type: array
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+    type: object
+  application.PersonalSpinLogDTO:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      points_gained:
+        type: integer
+      source:
+        type: string
+    type: object
   application.ProfileResponse:
     properties:
       claimed_checkpoints:
@@ -53,6 +103,83 @@ info:
   title: Spin Head API
   version: "1.0"
 paths:
+  /history/{player_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated spin history for a specific player
+      parameters:
+      - description: Player ID
+        in: path
+        name: player_id
+        required: true
+        type: string
+      - default: 20
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of items to skip
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/application.PersonalHistoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            type: object
+      summary: Get personal spin history
+      tags:
+      - History
+  /history/global:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated global spin history with player nicknames
+      parameters:
+      - default: 20
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of items to skip
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/application.GlobalHistoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            type: object
+      summary: Get global spin history
+      tags:
+      - History
   /players/{id}:
     get:
       consumes:

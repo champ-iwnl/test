@@ -25,6 +25,18 @@ func NewHistoryHandler(
 	}
 }
 
+// GetGlobal handles GET /history/global
+// @Summary Get global spin history
+// @Description Get paginated global spin history with player nicknames
+// @Tags History
+// @Accept json
+// @Produce json
+// @Param limit query int false "Number of items per page" default(20)
+// @Param offset query int false "Number of items to skip" default(0)
+// @Success 200 {object} application.GlobalHistoryResponse
+// @Failure 400 {object} object
+// @Failure 500 {object} object
+// @Router /history/global [get]
 func (h *HistoryHandler) GetGlobal(c *fiber.Ctx) error {
 	var req application.GetGlobalRequest
 	if err := c.QueryParser(&req); err != nil {
@@ -39,6 +51,20 @@ func (h *HistoryHandler) GetGlobal(c *fiber.Ctx) error {
 	return c.JSON(resp)
 }
 
+// GetPersonal handles GET /history/:player_id
+// @Summary Get personal spin history
+// @Description Get paginated spin history for a specific player
+// @Tags History
+// @Accept json
+// @Produce json
+// @Param player_id path string true "Player ID"
+// @Param limit query int false "Number of items per page" default(20)
+// @Param offset query int false "Number of items to skip" default(0)
+// @Success 200 {object} application.PersonalHistoryResponse
+// @Failure 400 {object} object
+// @Failure 404 {object} object
+// @Failure 500 {object} object
+// @Router /history/{player_id} [get]
 func (h *HistoryHandler) GetPersonal(c *fiber.Ctx) error {
 	var req application.GetPersonalRequest
 	if err := c.ParamsParser(&req); err != nil {
