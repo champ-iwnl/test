@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
@@ -59,6 +60,18 @@ func Init() *Config {
 		log.Printf("[Config] Note: Could not load %s, using environment variables or defaults", envPath)
 	} else {
 		log.Printf("[Config] Loaded .env from %s", envPath)
+	}
+
+	// Also try to load from executable directory
+	execPath, err := os.Executable()
+	if err == nil {
+		execDir := filepath.Dir(execPath)
+		envExecPath := filepath.Join(execDir, ".env")
+		if _, err := os.Stat(envExecPath); err == nil {
+			if err := godotenv.OverLoad(envExecPath); err == nil {
+				log.Printf("[Config] Loaded .env from executable directory: %s", envExecPath)
+			}
+		}
 	}
 
 	// Load rewards configuration from YAML
