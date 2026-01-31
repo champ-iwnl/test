@@ -2,6 +2,7 @@ package routes
 
 import (
 	"backend/internal/infrastructure/config"
+	"backend/internal/modules/history"
 	"backend/internal/modules/player"
 
 	"github.com/gofiber/fiber/v2"
