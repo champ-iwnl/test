@@ -29,62 +29,44 @@ interface NicknameFormProps {
   inputContainerClassName?: string
   buttonContainerClassName?: string
   hideButton?: boolean
+  hideInput?: boolean
+  register: any
+  handleSubmit: any
+  errors: any
+  serverError: string | null
+  enterMutation: any
+  onSubmit: (data: NicknameFormData) => void
 }
 
 export function NicknameForm({ 
   className, 
   inputContainerClassName, 
-  buttonContainerClassName 
-  , hideButton = false
+  buttonContainerClassName, 
+  hideButton = false,
+  hideInput = false,
+  register,
+  handleSubmit,
+  errors,
+  serverError,
+  enterMutation,
+  onSubmit
 }: NicknameFormProps) {
   const router = useRouter()
   const setPlayer = usePlayerStore((state) => state.setPlayer)
-  const [serverError, setServerError] = useState<string | null>(null)
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<NicknameFormData>({
-    resolver: zodResolver(nicknameSchema),
-  })
-
-  const enterMutation = useMutation({
-    mutationFn: (data: NicknameFormData) => authService.enter(data.nickname),
-    onSuccess: (data) => {
-      // Backend returns flat EnterResponse, map to Player shape used in store
-      setPlayer({
-        id: data.id,
-        nickname: data.nickname,
-        total_points: data.total_points,
-        created_at: data.created_at,
-      })
-      router.push('/home')
-    },
-    onError: (error: any) => {
-      // Handle backend error message
-      const message = error.response?.data?.error || 'เกิดข้อผิดพลาด กรุณาลองใหม่'
-      setServerError(message)
-    },
-  })
-
-  const onSubmit = (data: NicknameFormData) => {
-    setServerError(null)
-    enterMutation.mutate(data)
-  }
 
   return (
     <form id="nickname-form" onSubmit={handleSubmit(onSubmit)} className={cn("w-full flex flex-col", className)}>
-      <div className={cn("w-full", inputContainerClassName)}>
-        <Input
-          label="ชื่อสำหรับเล่น (Nickname)"
-          placeholder="Test 234"
-          {...register('nickname')}
-          error={errors.nickname?.message || serverError || undefined}
-          disabled={enterMutation.isPending}
-          autoComplete="off"
-        />
-      </div>
+      {!hideInput && (
+        <div className={cn("w-full", inputContainerClassName)}>
+          <Input
+            placeholder="Test 234"
+            {...register('nickname')}
+            error={errors.nickname?.message || serverError || undefined}
+            disabled={enterMutation.isPending}
+            autoComplete="off"
+          />
+        </div>
+      )}
       
       {!hideButton && (
         <div className={cn("mt-auto w-full", buttonContainerClassName)}>

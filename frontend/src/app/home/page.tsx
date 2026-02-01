@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Container } from '@/components/layout/Container'
-import { Button } from '@/components/ui/Button'
+import { CtaButton } from '@/components/ui/CtaButton'
+import { CtaFooter } from '@/components/ui/CtaFooter'
 import { Tabs } from '@/components/ui/Tabs'
 import { authService } from '@/services/auth.service'
 import { historyService } from '@/services/history.service'
@@ -37,6 +38,22 @@ export default function HomePage() {
   const [personalHistory, setPersonalHistory] = useState<PersonalSpinLog[]>([])
   const [rewardHistory, setRewardHistory] = useState<RewardHistoryItem[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
+  // Pagination / lazy-load state
+  const [globalLimit] = useState(20)
+  const [globalOffset, setGlobalOffset] = useState(0)
+  const [globalTotal, setGlobalTotal] = useState<number | null>(null)
+  const [loadingMoreGlobal, setLoadingMoreGlobal] = useState(false)
+  const [globalLoadError, setGlobalLoadError] = useState<string | null>(null)
+  const [globalRetryCount, setGlobalRetryCount] = useState(0)
+
+  const [personalLimit] = useState(20)
+  const [personalOffset, setPersonalOffset] = useState(0)
+  const [personalTotal, setPersonalTotal] = useState<number | null>(null)
+  const [loadingMorePersonal, setLoadingMorePersonal] = useState(false)
+  const [personalLoadError, setPersonalLoadError] = useState<string | null>(null)
+  const [personalRetryCount, setPersonalRetryCount] = useState(0)
+
+  const sentinelRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -73,12 +90,17 @@ export default function HomePage() {
     setLoadingHistory(true)
     const fetcher = async () => {
       if (activeTab === 'global') {
-        const response: GlobalHistoryResponse = await historyService.getGlobalHistory(100, 0)
+        // reset paging when switching tabs
+        setGlobalOffset(0)
+        const response: GlobalHistoryResponse = await historyService.getGlobalHistory(globalLimit, 0)
         setGlobalHistory(response.data || [])
+        setGlobalTotal(response.total ?? null)
       }
       if (activeTab === 'personal') {
-        const response: PersonalHistoryResponse = await historyService.getPersonalHistory(player.id, 100, 0)
+        setPersonalOffset(0)
+        const response: PersonalHistoryResponse = await historyService.getPersonalHistory(player.id, personalLimit, 0)
         setPersonalHistory(response.data || [])
+        setPersonalTotal(response.total ?? null)
       }
       if (activeTab === 'rewards') {
         const response: RewardHistoryResponse = await rewardService.getHistory(player.id)
@@ -93,6 +115,101 @@ export default function HomePage() {
       .finally(() => setLoadingHistory(false))
   }, [activeTab, player])
 
+  const shouldLoadMoreGlobal =
+    globalTotal !== null && globalOffset + globalHistory.length < globalTotal
+  const shouldLoadMorePersonal =
+    personalTotal !== null && personalOffset + personalHistory.length < personalTotal
+
+  // Load more handlers
+  const loadMoreGlobal = async () => {
+    if (loadingMoreGlobal) return
+    if (!shouldLoadMoreGlobal) return
+    setLoadingMoreGlobal(true)
+    setGlobalLoadError(null)
+    try {
+      const nextOffset = globalOffset + globalLimit
+      const response: GlobalHistoryResponse = await historyService.getGlobalHistory(globalLimit, nextOffset)
+      setGlobalHistory((prev) => [...prev, ...(response.data || [])])
+      setGlobalOffset(nextOffset)
+      setGlobalTotal(response.total ?? null)
+      setGlobalRetryCount(0)
+    } catch (e) {
+      setGlobalLoadError('โหลดประวัติทั้งหมดไม่สำเร็จ')
+    } finally {
+      setLoadingMoreGlobal(false)
+    }
+  }
+
+  const loadMorePersonal = async () => {
+    if (loadingMorePersonal) return
+    if (!shouldLoadMorePersonal) return
+    setLoadingMorePersonal(true)
+    setPersonalLoadError(null)
+    try {
+      const nextOffset = personalOffset + personalLimit
+      const response: PersonalHistoryResponse = await historyService.getPersonalHistory(player.id, personalLimit, nextOffset)
+      setPersonalHistory((prev) => [...prev, ...(response.data || [])])
+      setPersonalOffset(nextOffset)
+      setPersonalTotal(response.total ?? null)
+      setPersonalRetryCount(0)
+    } catch (e) {
+      setPersonalLoadError('โหลดประวัติของฉันไม่สำเร็จ')
+    } finally {
+      setLoadingMorePersonal(false)
+    }
+  }
+
+  // Retry with exponential backoff
+  const retryLoadMoreGlobal = () => {
+    const nextCount = globalRetryCount + 1
+    setGlobalRetryCount(nextCount)
+    const delay = Math.min(500 * Math.pow(2, nextCount), 4000)
+    setTimeout(() => loadMoreGlobal(), delay)
+  }
+
+  const retryLoadMorePersonal = () => {
+    const nextCount = personalRetryCount + 1
+    setPersonalRetryCount(nextCount)
+    const delay = Math.min(500 * Math.pow(2, nextCount), 4000)
+    setTimeout(() => loadMorePersonal(), delay)
+  }
+
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        if (!entry?.isIntersecting) return
+
+        if (activeTab === 'global') {
+          if (shouldLoadMoreGlobal && !loadingMoreGlobal) {
+            loadMoreGlobal()
+          }
+        }
+
+        if (activeTab === 'personal') {
+          if (shouldLoadMorePersonal && !loadingMorePersonal) {
+            loadMorePersonal()
+          }
+        }
+      },
+      { root: null, rootMargin: '300px', threshold: 0 }
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [
+    activeTab,
+    shouldLoadMoreGlobal,
+    shouldLoadMorePersonal,
+    loadingMoreGlobal,
+    loadingMorePersonal,
+    globalOffset,
+    personalOffset,
+  ])
+
   const totalPoints = player?.total_points ?? 0
   const totalCheckpoint = CHECKPOINTS[CHECKPOINTS.length - 1]
 
@@ -105,71 +222,33 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center p-4">
-      <Container className="relative rounded-3xl px-4 pt-4 pb-24">
-        <div className="flex items-center justify-between text-xs text-gray-400 mb-3">
-          <span>Home</span>
-          <span className="font-medium text-gray-600">{player?.nickname ?? '-'}</span>
+      <Container className="relative overflow-hidden px-0 pt-0 pb-4 h-[calc(100vh-2rem)] min-h-[600px] flex flex-col">
+        {/* Score card header - full bleed width */}
+        <div
+          style={{
+            height: '227px',
+            backgroundColor: '#dddddd',
+            opacity: 1,
+            position: 'relative',
+            top: '1px',
+          }}
+        >
+          <Card
+            style={{
+              position: 'absolute',
+              width: '343px',
+              height: '200px',
+              top: '15px',
+              left: '17px',
+              borderWidth: '1px',
+              borderColor: '#000000',
+              borderRadius: '16px',
+              opacity: 1,
+            }}
+          />
         </div>
 
-        <Card className="border border-gray-200">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="inline-flex items-center rounded-full bg-red text-white text-[10px] px-2 py-1">
-                แสดงคะแนน
-              </div>
-              <div className="mt-2 text-gray-700 font-semibold">คะแนนสะสม</div>
-            </div>
-            <div className="text-right text-gray-700 text-sm">คะแนนรวม 10,000 รอบของขวัญ 1 รายการ</div>
-          </div>
-
-          <div className="mt-2 text-2xl font-bold text-red">
-            {formatPoints(totalPoints)}/{formatPoints(totalCheckpoint)}
-          </div>
-
-          <div className="mt-4">
-            <div className="relative h-2 rounded-full bg-gray-200">
-              <div
-                className="absolute left-0 top-0 h-2 rounded-full bg-gradient-to-r from-yellow-300 to-gold"
-                style={{ width: `${progressPercent}%` }}
-              />
-              {CHECKPOINTS.map((value) => {
-                const left = (value / totalCheckpoint) * 100
-                const isClaimed = claimedCheckpoints.includes(value)
-                const isReach = totalPoints >= value
-                return (
-                  <div
-                    key={value}
-                    className="absolute -top-2"
-                    style={{ left: `calc(${left}% - 10px)` }}
-                  >
-                    <div
-                      className={
-                        isClaimed
-                          ? 'h-5 w-5 rounded-full bg-green-500 text-white text-[10px] flex items-center justify-center'
-                          : isReach
-                            ? 'h-5 w-5 rounded-full bg-gold text-white text-[10px] flex items-center justify-center'
-                            : 'h-5 w-5 rounded-full bg-gray-300'
-                      }
-                    >
-                      {isClaimed ? '✓' : ''}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-
-            <div className="mt-3 flex justify-between text-[10px] text-gray-400">
-              {CHECKPOINTS.map((value) => (
-                <span key={`label-${value}`}>ครบ {formatPoints(value)}</span>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-4 flex gap-2 text-[10px] text-gray-400">
-            <span>ต่ำสุด 300</span>
-            <span>สูงสุด 3000</span>
-          </div>
-        </Card>
+        <div className="flex-1 overflow-y-auto scrollbar-hidden pb-28 px-4 pt-4">
 
         <div className="mt-4">
           <Tabs
@@ -238,17 +317,45 @@ export default function HomePage() {
                 </div>
               </Card>
             ))}
+
+          {/* Infinite scroll sentinel + status */}
+          {(activeTab === 'global' || activeTab === 'personal') && (
+            <div className="mt-2">
+              {(activeTab === 'global' && globalLoadError) || (activeTab === 'personal' && personalLoadError) ? (
+                <div className="flex items-center justify-center gap-2 text-sm text-red-500">
+                  <span>
+                    {activeTab === 'global' ? globalLoadError : personalLoadError}
+                  </span>
+                  <button
+                    className="px-2 py-1 text-xs border border-red-200 rounded"
+                    onClick={activeTab === 'global' ? retryLoadMoreGlobal : retryLoadMorePersonal}
+                  >
+                    ลองใหม่
+                  </button>
+                </div>
+              ) : null}
+
+              {(activeTab === 'global' && loadingMoreGlobal) || (activeTab === 'personal' && loadingMorePersonal) ? (
+                <div className="text-center text-sm text-gray-400">กำลังโหลด...</div>
+              ) : null}
+
+              {(activeTab === 'global' && !loadingMoreGlobal && !globalLoadError && globalTotal !== null && !shouldLoadMoreGlobal) ||
+              (activeTab === 'personal' && !loadingMorePersonal && !personalLoadError && personalTotal !== null && !shouldLoadMorePersonal) ? (
+                <div className="text-center text-xs text-gray-400">ไม่มีข้อมูลเพิ่มเติม</div>
+              ) : null}
+
+              <div ref={sentinelRef} className="h-4" />
+            </div>
+          )}
         </div>
 
-        <div className="absolute left-0 right-0 bottom-0 px-4 pb-6 pt-4 bg-white rounded-b-3xl shadow-[0_-8px_24px_rgba(0,0,0,0.06)]">
-          <div className="mx-auto w-full max-w-[343px]">
-            <Link href="/game">
-              <Button size="md" className="w-full rounded-full">
-                ไปเล่นเกม
-              </Button>
-            </Link>
-          </div>
         </div>
+
+        <CtaFooter>
+          <Link href="/game">
+            <CtaButton>ไปเล่นเกม</CtaButton>
+          </Link>
+        </CtaFooter>
       </Container>
     </div>
   )

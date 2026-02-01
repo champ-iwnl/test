@@ -88,11 +88,11 @@ export interface RewardHistoryResponse {
 
 // Game
 export interface SpinRequest {
-  bet_amount?: number // if needed in future
+  player_id: string
 }
 
 export interface SpinResponse {
+  spin_id: string
   points_gained: number
-  result_angle: number
-  final_points: number
+  total_points_after: number
 }
