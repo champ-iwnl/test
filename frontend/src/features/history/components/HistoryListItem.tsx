@@ -15,31 +15,36 @@ export function HistoryListItem({
   timestamp,
   className = '',
 }: HistoryListItemProps) {
+  const fallbackAvatar = (
+    <img
+      src="/images/avatar.svg"
+      alt="avatar"
+      style={{ width: 48, height: 48, borderRadius: 32, display: 'block' }}
+    />
+  )
+
   return (
     <Card
-      noPadding
-      className={`w-full flex items-center gap-3 border-b border-gray-100 ${className}`}
-      style={{ height: '80px', opacity: 1, borderRadius: 0 }}
+      className={`w-full flex items-center gap-[30px] pl-[15px] pr-4 py-3 border border-gray-200 shadow-none rounded-none ${className}`}
+      style={{ minHeight: '72px', opacity: 1 }}
     >
       {/* Avatar */}
-      {avatar && <div className="ml-4">{avatar}</div>}
-
-      {/* Content area - 345×50 with justify-between */}
       <div
-        style={{
-          width: '300px',
-          height: '50px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          opacity: 1,
-        }}
+        className="flex items-center"
+        style={{ width: 48, height: 48, minWidth: 48, marginTop: 2 }}
       >
+        {avatar ?? fallbackAvatar}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 flex items-center justify-between">
         <div>
-          <div className="text-sm font-semibold text-gray-800">{title}</div>
+          <div className="text-[12px] font-semibold text-gray-800">{title}</div>
           <div className="text-[11px] text-gray-400">{subtitle}</div>
         </div>
-        <div className="text-[11px] text-gray-400">{timestamp}</div>
+        {timestamp ? (
+          <div className="text-[11px] text-gray-400 text-right whitespace-nowrap">{timestamp}</div>
+        ) : null}
       </div>
     </Card>
   )

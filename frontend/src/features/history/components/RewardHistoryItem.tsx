@@ -10,7 +10,7 @@ interface RewardHistoryItemProps {
 export function RewardHistoryItem({ item, className }: RewardHistoryItemProps) {
   return (
     <HistoryListItem
-      avatar={<div className="h-10 w-10 rounded-full bg-red" />}
+      avatar={<img src="/images/avatar.svg" alt="avatar" style={{ width: 48, height: 48, borderRadius: 32, display: 'block' }} />}
       title={item.reward_name}
       subtitle="ได้รับเมื่อ"
       timestamp={formatDate(item.claimed_at)}

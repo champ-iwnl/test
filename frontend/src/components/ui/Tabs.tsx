@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+ import { useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { cn } from '@/utils/cn'
 
@@ -52,18 +52,12 @@ export function Tabs({ items, activeId, onChange, className }: TabsProps) {
               ref={isActive ? activeTabRef : null}
               onClick={() => onChange(item.id)}
               className={cn(
-                'relative flex-shrink-0 px-4 py-2 text-sm font-medium rounded-full transition-colors focus:outline-none',
-                isActive ? 'text-white' : 'text-gray-500 hover:text-gray-700'
+                'relative flex-shrink-0 px-4 py-2 text-sm font-medium rounded-full transition-colors focus:outline-none border bg-transparent',
+                isActive
+                  ? 'text-[#FF383C] border-[#FF383C]'
+                  : 'text-[#979797] border-[#979797]'
               )}
             >
-              {isActive && (
-                <motion.div
-                  layoutId="activeTab"
-                  className="absolute inset-0 bg-gold rounded-full"
-                  initial={false}
-                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                />
-              )}
               <span className="relative z-10">{item.label}</span>
             </button>
           )

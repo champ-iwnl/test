@@ -11,10 +11,10 @@ interface PersonalHistoryItemProps {
 export function PersonalHistoryItem({ item, nickname, className }: PersonalHistoryItemProps) {
   return (
     <HistoryListItem
-      avatar={<div className="h-10 w-10 rounded-full bg-red" />}
+      avatar={<img src="/images/avatar.svg" alt="avatar" style={{ width: 48, height: 48, borderRadius: 32, display: 'block' }} />}
       title={nickname}
-      subtitle={`รางวัล: ${formatPoints(item.points_gained)}`}
-      timestamp={formatDate(item.created_at)}
+      subtitle={`รางวัล: ${formatPoints(item.points_gained)} | เล่นเมื่อ ${formatDate(item.created_at)}`}
+      timestamp=""
       className={className}
     />
   )

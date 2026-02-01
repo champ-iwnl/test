@@ -264,7 +264,10 @@ export default function HomePage() {
         </div>
 
         {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto pb-20" style={{ height: 'calc(812px - 227px - 80px)' }}>
+        <div
+          className="flex-1 overflow-y-auto pb-20 scrollbar-hide no-scrollbar"
+          style={{ height: 'calc(812px - 227px - 80px)', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
           {/* Tabs */}
           <div className="px-4 pt-4">
             <Tabs
