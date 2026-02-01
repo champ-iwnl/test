@@ -1,33 +1,27 @@
 interface ScoreDisplayProps {
   totalPoints: number
+  totalCheckpoint?: number
   className?: string
 }
 
-export function ScoreDisplay({ totalPoints, className = '' }: ScoreDisplayProps) {
+export function ScoreDisplay({ totalPoints, totalCheckpoint = 10000, className = '' }: ScoreDisplayProps) {
   return (
-    <div className={`${className}`}>
-      <div
-        className="text-gray-500"
-        style={{
-          fontFamily: 'Kanit',
-          fontSize: '14px',
-          fontWeight: 400,
-          lineHeight: '120%',
-        }}
-      >
-        คะแนนของฉัน
-      </div>
-      <div
-        className="text-red"
-        style={{
-          fontFamily: 'Kanit',
-          fontSize: '24px',
-          fontWeight: 600,
-          lineHeight: '120%',
-          marginTop: '4px',
-        }}
-      >
-        {totalPoints.toLocaleString()} คะแนน
+    <div className={`${className} w-full flex justify-end`}>
+      <div className="text-right" style={{ width: '100%' }}>
+        <div
+          className="text-red-600"
+          style={{
+            fontFamily: 'Kanit',
+            fontWeight: 600,
+            fontSize: '24px',
+            lineHeight: '24px',
+            letterSpacing: '0px',
+            textAlign: 'right',
+            color: '#FF2428',
+          }}
+        >
+          {`${totalPoints.toLocaleString()}/${totalCheckpoint.toLocaleString()}`}
+        </div>
       </div>
     </div>
   )

@@ -6,4 +6,8 @@ export const rewardService = {
     const response = await api.get<RewardHistoryResponse>(`/rewards/${playerId}`)
     return response.data
   },
+  claimCheckpoint: async (playerId: string, checkpoint: number) => {
+    const response = await api.post(`/rewards/${playerId}/claim`, { checkpoint })
+    return response.data
+  },
 }

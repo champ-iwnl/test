@@ -1,5 +1,6 @@
 interface ClaimButtonProps {
-  checkpoint: number
+  checkpointIndex?: number
+  label?: string
   status: 'claimable' | 'claimed' | 'locked'
   onClaim?: () => void
   loading?: boolean
@@ -7,19 +8,36 @@ interface ClaimButtonProps {
 }
 
 export function ClaimButton({
-  checkpoint,
+  checkpointIndex,
+  label,
   status,
   onClaim,
   loading = false,
   className = '',
 }: ClaimButtonProps) {
+  const defaultLabel = label || `รับรางวัล ${checkpointIndex ?? ''}`
+  const width = 68.99998474121094
+  const height = 21.76318359375
+  const borderRadius = 12.5
+
   if (status === 'claimed') {
     return (
       <div
-        className={`inline-flex items-center justify-center px-3 py-1 text-xs text-green-600 bg-green-50 border border-green-200 ${className}`}
-        style={{ borderRadius: '4px' }}
+        className={`inline-flex items-center justify-center text-xs ${className}`}
+        style={{
+          borderRadius: `${borderRadius}px`,
+          width: `${width}px`,
+          height: `${height}px`,
+          background: '#FF7B7B',
+          color: '#FFFFFF',
+          fontFamily: 'Kanit',
+          fontSize: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
       >
-        ✓ รับแล้ว
+        {`รับแล้ว`}
       </div>
     )
   }
@@ -27,10 +45,21 @@ export function ClaimButton({
   if (status === 'locked') {
     return (
       <div
-        className={`inline-flex items-center justify-center px-3 py-1 text-xs text-gray-400 bg-gray-100 border border-gray-200 ${className}`}
-        style={{ borderRadius: '4px' }}
+        className={`inline-flex items-center justify-center text-xs ${className}`}
+        style={{
+          borderRadius: `${borderRadius}px`,
+          width: `${width}px`,
+          height: `${height}px`,
+          background: '#DDDDDD',
+          color: '#8B8B8B',
+          fontFamily: 'Kanit',
+          fontSize: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
       >
-        🔒 ล็อค
+        {defaultLabel}
       </div>
     )
   }
@@ -40,10 +69,22 @@ export function ClaimButton({
       type="button"
       onClick={onClaim}
       disabled={loading}
-      className={`inline-flex items-center justify-center px-3 py-1 text-xs text-white bg-red hover:bg-red/90 border border-red disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
-      style={{ borderRadius: '4px' }}
+      className={`${className}`}
+      style={{
+        borderRadius: `${borderRadius}px`,
+        width: `${width}px`,
+        height: `${height}px`,
+        background: '#FF0004',
+        color: '#FFFFFF',
+        border: 'none',
+        fontFamily: 'Kanit',
+        fontSize: '12px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
     >
-      {loading ? 'กำลังรับ...' : 'รับ'}
+      {loading ? 'กำลังรับ...' : defaultLabel}
     </button>
   )
 }

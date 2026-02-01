@@ -223,6 +223,18 @@ export default function HomePage() {
     return Math.min((totalPoints / totalCheckpoint) * 100, 100)
   }, [totalPoints, totalCheckpoint])
 
+  const handleClaimCheckpoint = async (checkpoint: number) => {
+    if (!player) return
+    try {
+      await rewardService.claimCheckpoint(player.id, checkpoint)
+      // Update claimed checkpoints
+      setClaimedCheckpoints((prev) => [...new Set([...prev, checkpoint])])
+    } catch (error) {
+      console.error('Failed to claim checkpoint:', error)
+      // TODO: Show error toast
+    }
+  }
+
   if (!mounted) return null
 
   return (
@@ -235,18 +247,19 @@ export default function HomePage() {
             height: '227px',
             backgroundColor: '#dddddd',
             position: 'relative',
-            paddingTop: '15px',
+            boxSizing: 'border-box',
             display: 'flex',
             justifyContent: 'center',
-            boxSizing: 'border-box',
+            alignItems: 'center',
             opacity: 1,
           }}
         >
-          {/* Hero card inside header */}
+          {/* Hero card inside header (centered for equal left/right spacing) */}
           <HeroCard
             totalPoints={totalPoints}
             claimedCheckpoints={claimedCheckpoints}
             loading={loadingProfile}
+            onClaim={handleClaimCheckpoint}
           />
         </div>
 
