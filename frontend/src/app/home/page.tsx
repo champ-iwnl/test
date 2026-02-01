@@ -13,6 +13,11 @@ import { rewardService } from '@/services/reward.service'
 import { usePlayerStore } from '@/store/playerStore'
 import { formatPoints, formatDate } from '@/utils/formatters'
 import { Card } from '@/components/ui/Card'
+import { HeroCard } from '@/features/home/components/HeroCard'
+import { GlobalHistoryItem } from '@/features/history/components/GlobalHistoryItem'
+import { PersonalHistoryItem } from '@/features/history/components/PersonalHistoryItem'
+import { RewardHistoryItem } from '@/features/history/components/RewardHistoryItem'
+import { InfiniteScrollSentinel } from '@/features/history/components/InfiniteScrollSentinel'
 import type {
   GlobalHistoryResponse,
   PersonalHistoryResponse,
@@ -230,22 +235,18 @@ export default function HomePage() {
             height: '227px',
             backgroundColor: '#dddddd',
             position: 'relative',
+            paddingTop: '15px',
+            display: 'flex',
+            justifyContent: 'center',
+            boxSizing: 'border-box',
             opacity: 1,
           }}
         >
           {/* Hero card inside header */}
-          <Card
-            style={{
-              position: 'absolute',
-              width: '343px',
-              height: '200px',
-              top: '15px',
-              left: '17px',
-              borderWidth: '1px',
-              borderColor: '#000000',
-              borderRadius: '16px',
-              opacity: 1,
-            }}
+          <HeroCard
+            totalPoints={totalPoints}
+            claimedCheckpoints={claimedCheckpoints}
+            loading={loadingProfile}
           />
         </div>
 
@@ -284,115 +285,30 @@ export default function HomePage() {
 
             {activeTab === 'global' &&
               globalHistory.map((item) => (
-                <Card
-                  key={item.id}
-                  noPadding
-                  className="w-full flex items-center gap-3 border-b border-gray-100"
-                  style={{ height: '80px', opacity: 1, borderRadius: 0 }}
-                >
-                  <div className="h-10 w-10 rounded-full bg-red ml-4" />
-                  <div
-                    style={{
-                      width: '300px',
-                      height: '50px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      opacity: 1,
-                    }}
-                  >
-                    <div>
-                      <div className="text-sm font-semibold text-gray-800">{item.player_nickname}</div>
-                      <div className="text-[11px] text-gray-400">รางวัล: {formatPoints(item.points_gained)}</div>
-                    </div>
-                    <div className="text-[11px] text-gray-400">{formatDate(item.created_at)}</div>
-                  </div>
-                </Card>
+                <GlobalHistoryItem key={item.id} item={item} />
               ))}
 
             {activeTab === 'personal' &&
               personalHistory.map((item) => (
-                <Card
-                  key={item.id}
-                  noPadding
-                  className="w-full flex items-center gap-3 border-b border-gray-100"
-                  style={{ height: '80px', opacity: 1, borderRadius: 0 }}
-                >
-                  <div className="h-10 w-10 rounded-full bg-red ml-4" />
-                  <div
-                    style={{
-                      width: '300px',
-                      height: '50px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      opacity: 1,
-                    }}
-                  >
-                    <div>
-                      <div className="text-sm font-semibold text-gray-800">{player?.nickname ?? '-'}</div>
-                      <div className="text-[11px] text-gray-400">รางวัล: {formatPoints(item.points_gained)}</div>
-                    </div>
-                    <div className="text-[11px] text-gray-400">{formatDate(item.created_at)}</div>
-                  </div>
-                </Card>
+                <PersonalHistoryItem key={item.id} item={item} nickname={player?.nickname ?? '-'} />
               ))}
 
             {activeTab === 'rewards' &&
               rewardHistory.map((item) => (
-                <Card
-                  key={item.id}
-                  noPadding
-                  className="w-full flex items-center gap-3 border-b border-gray-100"
-                  style={{ height: '80px', opacity: 1, borderRadius: 0 }}
-                >
-                  <div className="h-10 w-10 rounded-full bg-red ml-4" />
-                  <div
-                    style={{
-                      width: '300px',
-                      height: '50px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      opacity: 1,
-                    }}
-                  >
-                    <div>
-                      <div className="text-sm font-semibold text-gray-800">{item.reward_name}</div>
-                      <div className="text-[11px] text-gray-400">ได้รับเมื่อ</div>
-                    </div>
-                    <div className="text-[11px] text-gray-400">{formatDate(item.claimed_at)}</div>
-                  </div>
-                </Card>
+                <RewardHistoryItem key={item.id} item={item} />
               ))}
 
             {/* Infinite scroll status */}
             {(activeTab === 'global' || activeTab === 'personal') && (
-              <div className="mt-2 px-4">
-                {(activeTab === 'global' && globalLoadError) || (activeTab === 'personal' && personalLoadError) ? (
-                  <div className="flex items-center justify-center gap-2 text-sm text-red-500">
-                    <span>{activeTab === 'global' ? globalLoadError : personalLoadError}</span>
-                    <button
-                      className="px-2 py-1 text-xs border border-red-200"
-                      onClick={activeTab === 'global' ? retryLoadMoreGlobal : retryLoadMorePersonal}
-                      style={{ borderRadius: 0 }}
-                    >
-                      ลองใหม่
-                    </button>
-                  </div>
-                ) : null}
-
-                {(activeTab === 'global' && loadingMoreGlobal) || (activeTab === 'personal' && loadingMorePersonal) ? (
-                  <div className="text-center text-sm text-gray-400">กำลังโหลด...</div>
-                ) : null}
-
-                {(activeTab === 'global' && !loadingMoreGlobal && !globalLoadError && globalTotal !== null && !shouldLoadMoreGlobal) ||
-                (activeTab === 'personal' && !loadingMorePersonal && !personalLoadError && personalTotal !== null && !shouldLoadMorePersonal) ? (
-                  <div className="text-center text-xs text-gray-400">ไม่มีข้อมูลเพิ่มเติม</div>
-                ) : null}
-
+              <>
+                <InfiniteScrollSentinel
+                  loading={activeTab === 'global' ? loadingMoreGlobal : loadingMorePersonal}
+                  error={activeTab === 'global' ? globalLoadError : personalLoadError}
+                  hasMore={activeTab === 'global' ? shouldLoadMoreGlobal : shouldLoadMorePersonal}
+                  onRetry={activeTab === 'global' ? retryLoadMoreGlobal : retryLoadMorePersonal}
+                />
                 <div ref={sentinelRef} className="h-4" />
-              </div>
+              </>
             )}
           </div>
         </div>
