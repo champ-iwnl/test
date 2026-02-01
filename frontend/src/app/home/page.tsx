@@ -221,18 +221,19 @@ export default function HomePage() {
   if (!mounted) return null
 
   return (
-    <div className="min-h-screen bg-gray-50 flex justify-center p-4">
-      <Container className="relative overflow-hidden px-0 pt-0 pb-4 h-[calc(100vh-2rem)] min-h-[600px] flex flex-col">
-        {/* Score card header - full bleed width */}
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <Container className="flex flex-col">
+        {/* Header section with gray background */}
         <div
           style={{
+            width: '100%',
             height: '227px',
             backgroundColor: '#dddddd',
-            opacity: 1,
             position: 'relative',
-            top: '1px',
+            opacity: 1,
           }}
         >
+          {/* Hero card inside header */}
           <Card
             style={{
               position: 'absolute',
@@ -248,109 +249,155 @@ export default function HomePage() {
           />
         </div>
 
-        <div className="flex-1 overflow-y-auto scrollbar-hidden pb-28 px-4 pt-4">
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto pb-20" style={{ height: 'calc(812px - 227px - 80px)' }}>
+          {/* Tabs */}
+          <div className="px-4 pt-4">
+            <Tabs
+              items={[
+                { id: 'global', label: 'ประวัติทั้งหมด' },
+                { id: 'personal', label: 'ประวัติของฉัน' },
+                { id: 'rewards', label: 'รางวัลที่ได้รับแล้ว' },
+              ]}
+              activeId={activeTab}
+              onChange={(id) => setActiveTab(id as typeof activeTab)}
+            />
+          </div>
 
-        <div className="mt-4">
-          <Tabs
-            items={[
-              { id: 'global', label: 'ประวัติทั้งหมด' },
-              { id: 'personal', label: 'ประวัติของฉัน' },
-              { id: 'rewards', label: 'รางวัลที่ได้รับแล้ว' },
-            ]}
-            activeId={activeTab}
-            onChange={(id) => setActiveTab(id as typeof activeTab)}
-          />
-        </div>
+          {/* List items */}
+          <div className="mt-3">
+            {loadingProfile || loadingHistory ? (
+              <div className="text-center text-sm text-gray-400 py-4">กำลังโหลด...</div>
+            ) : null}
 
-        <div className="mt-3 space-y-3">
-          {loadingProfile || loadingHistory ? (
-            <div className="text-center text-sm text-gray-400">กำลังโหลด...</div>
-          ) : null}
+            {!loadingHistory && activeTab === 'global' && globalHistory.length === 0 ? (
+              <div className="text-center text-sm text-gray-400 py-4">ยังไม่มีประวัติทั้งหมด</div>
+            ) : null}
 
-          {!loadingHistory && activeTab === 'global' && globalHistory.length === 0 ? (
-            <div className="text-center text-sm text-gray-400">ยังไม่มีประวัติทั้งหมด</div>
-          ) : null}
+            {!loadingHistory && activeTab === 'personal' && personalHistory.length === 0 ? (
+              <div className="text-center text-sm text-gray-400 py-4">ยังไม่มีประวัติของฉัน</div>
+            ) : null}
 
-          {!loadingHistory && activeTab === 'personal' && personalHistory.length === 0 ? (
-            <div className="text-center text-sm text-gray-400">ยังไม่มีประวัติของฉัน</div>
-          ) : null}
+            {!loadingHistory && activeTab === 'rewards' && rewardHistory.length === 0 ? (
+              <div className="text-center text-sm text-gray-400 py-4">ยังไม่มีรางวัลที่ได้รับ</div>
+            ) : null}
 
-          {!loadingHistory && activeTab === 'rewards' && rewardHistory.length === 0 ? (
-            <div className="text-center text-sm text-gray-400">ยังไม่มีรางวัลที่ได้รับ</div>
-          ) : null}
-
-          {activeTab === 'global' &&
-            globalHistory.map((item) => (
-              <Card key={item.id} className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-red" />
-                <div className="flex-1">
-                  <div className="text-sm font-semibold text-gray-800">{item.player_nickname}</div>
-                  <div className="text-[11px] text-gray-400">
-                    รางวัล: {formatPoints(item.points_gained)} | เล่นเมื่อ {formatDate(item.created_at)}
-                  </div>
-                </div>
-              </Card>
-            ))}
-
-          {activeTab === 'personal' &&
-            personalHistory.map((item) => (
-              <Card key={item.id} className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-red" />
-                <div className="flex-1">
-                  <div className="text-sm font-semibold text-gray-800">{player?.nickname ?? '-'}</div>
-                  <div className="text-[11px] text-gray-400">
-                    รางวัล: {formatPoints(item.points_gained)} | เล่นเมื่อ {formatDate(item.created_at)}
-                  </div>
-                </div>
-              </Card>
-            ))}
-
-          {activeTab === 'rewards' &&
-            rewardHistory.map((item) => (
-              <Card key={item.id} className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-red" />
-                <div className="flex-1">
-                  <div className="text-sm font-semibold text-gray-800">{item.reward_name}</div>
-                  <div className="text-[11px] text-gray-400">
-                    ได้รับเมื่อ {formatDate(item.claimed_at)}
-                  </div>
-                </div>
-              </Card>
-            ))}
-
-          {/* Infinite scroll sentinel + status */}
-          {(activeTab === 'global' || activeTab === 'personal') && (
-            <div className="mt-2">
-              {(activeTab === 'global' && globalLoadError) || (activeTab === 'personal' && personalLoadError) ? (
-                <div className="flex items-center justify-center gap-2 text-sm text-red-500">
-                  <span>
-                    {activeTab === 'global' ? globalLoadError : personalLoadError}
-                  </span>
-                  <button
-                    className="px-2 py-1 text-xs border border-red-200 rounded"
-                    onClick={activeTab === 'global' ? retryLoadMoreGlobal : retryLoadMorePersonal}
+            {activeTab === 'global' &&
+              globalHistory.map((item) => (
+                <Card
+                  key={item.id}
+                  noPadding
+                  className="w-full flex items-center gap-3 border-b border-gray-100"
+                  style={{ height: '80px', opacity: 1, borderRadius: 0 }}
+                >
+                  <div className="h-10 w-10 rounded-full bg-red ml-4" />
+                  <div
+                    style={{
+                      width: '300px',
+                      height: '50px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      opacity: 1,
+                    }}
                   >
-                    ลองใหม่
-                  </button>
-                </div>
-              ) : null}
+                    <div>
+                      <div className="text-sm font-semibold text-gray-800">{item.player_nickname}</div>
+                      <div className="text-[11px] text-gray-400">รางวัล: {formatPoints(item.points_gained)}</div>
+                    </div>
+                    <div className="text-[11px] text-gray-400">{formatDate(item.created_at)}</div>
+                  </div>
+                </Card>
+              ))}
 
-              {(activeTab === 'global' && loadingMoreGlobal) || (activeTab === 'personal' && loadingMorePersonal) ? (
-                <div className="text-center text-sm text-gray-400">กำลังโหลด...</div>
-              ) : null}
+            {activeTab === 'personal' &&
+              personalHistory.map((item) => (
+                <Card
+                  key={item.id}
+                  noPadding
+                  className="w-full flex items-center gap-3 border-b border-gray-100"
+                  style={{ height: '80px', opacity: 1, borderRadius: 0 }}
+                >
+                  <div className="h-10 w-10 rounded-full bg-red ml-4" />
+                  <div
+                    style={{
+                      width: '300px',
+                      height: '50px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      opacity: 1,
+                    }}
+                  >
+                    <div>
+                      <div className="text-sm font-semibold text-gray-800">{player?.nickname ?? '-'}</div>
+                      <div className="text-[11px] text-gray-400">รางวัล: {formatPoints(item.points_gained)}</div>
+                    </div>
+                    <div className="text-[11px] text-gray-400">{formatDate(item.created_at)}</div>
+                  </div>
+                </Card>
+              ))}
 
-              {(activeTab === 'global' && !loadingMoreGlobal && !globalLoadError && globalTotal !== null && !shouldLoadMoreGlobal) ||
-              (activeTab === 'personal' && !loadingMorePersonal && !personalLoadError && personalTotal !== null && !shouldLoadMorePersonal) ? (
-                <div className="text-center text-xs text-gray-400">ไม่มีข้อมูลเพิ่มเติม</div>
-              ) : null}
+            {activeTab === 'rewards' &&
+              rewardHistory.map((item) => (
+                <Card
+                  key={item.id}
+                  noPadding
+                  className="w-full flex items-center gap-3 border-b border-gray-100"
+                  style={{ height: '80px', opacity: 1, borderRadius: 0 }}
+                >
+                  <div className="h-10 w-10 rounded-full bg-red ml-4" />
+                  <div
+                    style={{
+                      width: '300px',
+                      height: '50px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      opacity: 1,
+                    }}
+                  >
+                    <div>
+                      <div className="text-sm font-semibold text-gray-800">{item.reward_name}</div>
+                      <div className="text-[11px] text-gray-400">ได้รับเมื่อ</div>
+                    </div>
+                    <div className="text-[11px] text-gray-400">{formatDate(item.claimed_at)}</div>
+                  </div>
+                </Card>
+              ))}
 
-              <div ref={sentinelRef} className="h-4" />
-            </div>
-          )}
+            {/* Infinite scroll status */}
+            {(activeTab === 'global' || activeTab === 'personal') && (
+              <div className="mt-2 px-4">
+                {(activeTab === 'global' && globalLoadError) || (activeTab === 'personal' && personalLoadError) ? (
+                  <div className="flex items-center justify-center gap-2 text-sm text-red-500">
+                    <span>{activeTab === 'global' ? globalLoadError : personalLoadError}</span>
+                    <button
+                      className="px-2 py-1 text-xs border border-red-200"
+                      onClick={activeTab === 'global' ? retryLoadMoreGlobal : retryLoadMorePersonal}
+                      style={{ borderRadius: 0 }}
+                    >
+                      ลองใหม่
+                    </button>
+                  </div>
+                ) : null}
+
+                {(activeTab === 'global' && loadingMoreGlobal) || (activeTab === 'personal' && loadingMorePersonal) ? (
+                  <div className="text-center text-sm text-gray-400">กำลังโหลด...</div>
+                ) : null}
+
+                {(activeTab === 'global' && !loadingMoreGlobal && !globalLoadError && globalTotal !== null && !shouldLoadMoreGlobal) ||
+                (activeTab === 'personal' && !loadingMorePersonal && !personalLoadError && personalTotal !== null && !shouldLoadMorePersonal) ? (
+                  <div className="text-center text-xs text-gray-400">ไม่มีข้อมูลเพิ่มเติม</div>
+                ) : null}
+
+                <div ref={sentinelRef} className="h-4" />
+              </div>
+            )}
+          </div>
         </div>
 
-        </div>
-
+        {/* Footer */}
         <CtaFooter>
           <Link href="/game">
             <CtaButton>ไปเล่นเกม</CtaButton>

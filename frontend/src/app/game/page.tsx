@@ -185,18 +185,79 @@ export default function GamePage() {
   if (!mounted) return null
 
   return (
-    <div className="min-h-screen bg-gray-50 flex justify-center p-4">
-      <Container className="relative rounded-3xl px-4 pt-6 pb-24 bg-[#F8F1E7] h-[calc(100vh-2rem)] min-h-[600px] overflow-hidden">
-        <div className="text-xs text-gray-400 mb-4">Game Spin (Start)</div>
-        <div className="text-center text-lg font-semibold text-gray-700">
-          คะแนนสะสม {scoreText}
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <Container className="flex flex-col items-center justify-between bg-[#F8F1E7]">
+        {/* Score display */}
+        <div className="pt-8 text-center">
+          <div className="text-lg font-semibold text-gray-800">คะแนนสะสม {scoreText}</div>
         </div>
 
-        <div className="relative mt-8 flex flex-col items-center">
+        {/* Wheel container */}
+        <div className="flex-1 flex items-center justify-center relative">
           <div className="relative flex items-center justify-center">
             <div
-                className={
-                  isSettling
+              className={
+                isSettling
+                  ? 'transition-transform duration-[2200ms] ease-[cubic-bezier(0.15,0.85,0.2,1)]'
+                  : 'transition-transform duration-75 linear'
+              }
+              style={{ transform: `rotate(${rotation}deg)` }}
+            >
+              <Image src="/images/spin-wheel.svg" alt="Spin wheel" width={320} height={320} priority />
+            </div>
+
+            <div className="absolute top-[-34px]">
+              <Image src="/images/spin-pin.svg" alt="Pin" width={80} height={94} />
+            </div>
+
+            <button
+              type="button"
+              onClick={isSpinning ? stopSpin : spin}
+              aria-label={isSpinning ? 'หยุดการหมุน' : 'เริ่มหมุน'}
+              className="absolute focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            >
+              <Image src="/images/spin-coin.svg" alt="Coin" width={72} height={72} className={isSpinning ? 'animate-pulse' : ''} />
+            </button>
+          </div>
+        </div>
+
+        {/* Button section */}
+        <div className="pb-24">
+          {isSpinning ? (
+            <Button variant="secondary" size="sm" onClick={stopSpin} isLoading={isStopping} className="px-6" style={{ borderRadius: 0 }}>
+              หยุด
+            </Button>
+          ) : (
+            <Button variant="secondary" size="sm" onClick={spin} className="px-6" style={{ borderRadius: 0 }}>
+              เริ่มหมุน
+            </Button>
+          )}
+
+          {errorMessage && <div className="mt-3 text-sm text-red-500 text-center">{errorMessage}</div>}
+          {statusMessage && !errorMessage && <div className="mt-3 text-sm text-gray-500 text-center">{statusMessage}</div>}
+        </div>
+
+        {/* Footer */}
+        <CtaFooter>
+          <Link href="/home">
+            <CtaButton>กลับหน้าหลัก</CtaButton>
+          </Link>
+        </CtaFooter>
+      </Container>
+
+      {/* Result modal */}
+      <Modal isOpen={modalOpen} onClose={handleCloseModal} showCloseButton>
+        <div className="text-center">
+          <div className="text-xl font-semibold text-gray-800 mb-2">ได้รับ</div>
+          <div className="text-gray-500 mb-6">{result ? `${formatPoints(result)} คะแนน` : '-'}</div>
+          <Button size="sm" onClick={handleCloseModal} className="px-8" style={{ borderRadius: 0 }}>
+            ปิด
+          </Button>
+        </div>
+      </Modal>
+    </div>
+  )
+}
                     ? 'transition-transform duration-[2200ms] ease-[cubic-bezier(0.15,0.85,0.2,1)]'
                     : 'transition-transform duration-75 linear'
                 }
