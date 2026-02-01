@@ -33,8 +33,8 @@ export function SpinWheel({
       </div>
 
       {/* Pointer/Pin at top */}
-      <div className="absolute top-[-34px]">
-        <Image src="/images/spin-pin.svg" alt="Pin" width={80} height={94} />
+      <div className="absolute" style={{ top: '-44px', left: '50%', transform: 'translateX(-50%)' }}>
+        <Image src="/images/spin-pin.svg" alt="Pin" width={63} height={63} />
       </div>
 
       {/* Center button */}

@@ -11,6 +11,7 @@ import { gameService } from '@/services/game.service'
 import { usePlayerStore } from '@/store/playerStore'
 import { formatPoints } from '@/utils/formatters'
 import { SpinWheel } from '@/features/game/components/SpinWheel'
+import { SpinActionButton } from '@/features/game/components/SpinActionButton'
 import { ResultModal } from '@/features/game/components/ResultModal'
 import { useSpinWheel } from '@/features/game/hooks/useSpinWheel'
 
@@ -88,43 +89,31 @@ export default function GamePage() {
       <Container className="flex flex-col items-center justify-between bg-[#F8F1E7]">
         {/* Score display */}
         <div className="pt-8 text-center">
-          <div className="text-lg font-semibold text-gray-800">คะแนนสะสม {scoreText}</div>
+          <div className="text-[24px] font-bold text-gray-800 font-kanit">คะแนนสะสม {scoreText}</div>
         </div>
 
-        {/* Wheel container */}
-        <div className="flex-1 flex items-center justify-center relative">
+        {/* Wheel + Button */}
+        <div className="flex-1 flex flex-col items-center justify-center relative">
           <SpinWheel
             rotation={spinWheel.rotation}
             isSettling={spinWheel.isSettling}
             isSpinning={spinWheel.isSpinning}
             onCoinClick={handleCoinClick}
           />
+
+          {/* Button section */}
+          <div className="mt-[10px] pb-24 relative">
+            <SpinActionButton
+              isSpinning={spinWheel.isSpinning}
+              onClick={spinWheel.isSpinning ? spinWheel.stopSpin : spin}
+            />
+          </div>
         </div>
 
-        {/* Button section */}
-        <div className="pb-24">
-          {spinWheel.isSpinning ? (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={spinWheel.stopSpin}
-              isLoading={spinWheel.isStopping}
-              className="px-6"
-              style={{ borderRadius: 0 }}
-            >
-              หยุด
-            </Button>
-          ) : (
-            <Button variant="secondary" size="sm" onClick={spin} className="px-6" style={{ borderRadius: 0 }}>
-              เริ่มหมุน
-            </Button>
-          )}
-
-          {errorMessage && <div className="mt-3 text-sm text-red-500 text-center">{errorMessage}</div>}
-          {spinWheel.statusMessage && !errorMessage && (
-            <div className="mt-3 text-sm text-gray-500 text-center">{spinWheel.statusMessage}</div>
-          )}
-        </div>
+        {errorMessage && <div className="mt-3 text-sm text-red-500 text-center">{errorMessage}</div>}
+        {spinWheel.statusMessage && !errorMessage && (
+          <div className="mt-3 text-sm text-gray-500 text-center">{spinWheel.statusMessage}</div>
+        )}
 
         {/* Footer */}
         <CtaFooter>

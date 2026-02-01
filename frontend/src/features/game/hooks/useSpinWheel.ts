@@ -113,7 +113,6 @@ export function useSpinWheel(options?: UseSpinWheelOptions) {
     if (!hasResult || result === null) {
       setPendingStop(true)
       pendingStopRef.current = true
-      setStatusMessage('กำลังสุ่มผล...')
       return
     }
 
