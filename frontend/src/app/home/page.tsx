@@ -269,7 +269,7 @@ export default function HomePage() {
           <div className="px-4 pt-4">
             <Tabs
               items={[
-                { id: 'global', label: 'ประวัติทั้งหมด' },
+                { id: 'global', label: 'ประวัติทั่วโลก' },
                 { id: 'personal', label: 'ประวัติของฉัน' },
                 { id: 'rewards', label: 'รางวัลที่ได้รับแล้ว' },
               ]}

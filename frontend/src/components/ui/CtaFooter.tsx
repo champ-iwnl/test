@@ -7,14 +7,14 @@ type CtaFooterProps = PropsWithChildren<{
 
 export function CtaFooter({ className, children }: CtaFooterProps) {
   return (
-    <div className="absolute left-0 right-0 bottom-0">
+    <div className="fixed left-0 right-0 bottom-0 z-50 flex justify-center">
       <div
         className={cn(
-          'px-4 pb-6 pt-4 bg-white rounded-b-3xl shadow-[0_-8px_24px_rgba(0,0,0,0.06)]',
+          'px-4 pb-6 pt-4 bg-white rounded-b-3xl  w-full max-w-[375px]',
           className
         )}
       >
-        <div className="mx-auto w-full max-w-[343px]">{children}</div>
+        <div className="mx-auto w-full">{children}</div>
       </div>
     </div>
   )
