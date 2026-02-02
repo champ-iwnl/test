@@ -1,0 +1,13 @@
+.git
+bin
+tmp
+vendor
+node_modules
+*.log
+.env
+.air.toml
+**/.git
+**/.idea
+**/.vscode
+*.exe
+*.test
