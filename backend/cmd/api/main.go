@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	_ "backend/docs" // This is required for swagger
 	"backend/internal/adapter/http/routes"
@@ -70,12 +71,16 @@ func main() {
 	// Create Fiber app
 	app := fiber.New()
 
-	// Enable CORS for frontend origin(s)
 	// Enable CORS for frontend origin(s) (configurable via CORS_ALLOW_ORIGINS)
-	app.Use(cors.New(cors.Config{
+	corsConfig := cors.Config{
 		AllowOrigins:     cfg.Server.AllowOrigins,
 		AllowCredentials: false,
-	}))
+	}
+	if strings.TrimSpace(cfg.Server.AllowOrigins) == "*" {
+		corsConfig.AllowOrigins = ""
+		corsConfig.AllowOriginsFunc = func(origin string) bool { return true }
+	}
+	app.Use(cors.New(corsConfig))
 
 	// Middleware
 	app.Use(logger.New())

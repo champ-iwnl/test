@@ -175,6 +175,49 @@ go test -cover ./...
 - [Project Structure](backend/PROJECT_STRUCTURE.md) - Directory layout and responsibilities
 - [Phase 1 Setup](backend/PHASE_1_SETUP.md) - Initial infrastructure completion
 
+## Azure Deployment (Container Apps)
+
+This setup deploys **backend** and **frontend** as separate containers, with **Azure Database for PostgreSQL**.
+
+### Prerequisites
+- Azure subscription
+- Azure Container Registry (ACR) for images
+- Azure Database for PostgreSQL (Flexible Server)
+
+### Steps (high level)
+1. **Build and push images**
+	- Build backend image from [backend/Dockerfile](backend/Dockerfile)
+	- Build frontend image from [frontend/Dockerfile](frontend/Dockerfile)
+	- Push both images to ACR
+
+2. **Provision database**
+	- Create Azure Database for PostgreSQL
+	- Allow network access from Container Apps
+	- Set DB credentials for the backend app
+
+3. **Deploy backend (Container App)**
+	- Image: backend image in ACR
+	- Port: 3001
+	- Required env vars:
+	  - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_SSLMODE=require`
+	  - `SERVER_PORT=3001`, `SERVER_ENV=production`
+	  - `CORS_ALLOW_ORIGINS` set to your frontend URL
+
+4. **Deploy frontend (Container App)**
+	- Image: frontend image in ACR
+	- Port: 3000
+	- Env vars:
+	  - `NEXT_PUBLIC_API_URL` = backend public URL
+	  - Other `NEXT_PUBLIC_*` values as needed
+
+5. **Verify**
+	- Backend health: `/health`
+	- Swagger UI: `/swagger/index.html`
+
+> Notes:
+> - For custom domains, use Container Apps domain binding and update CORS/`NEXT_PUBLIC_API_URL` accordingly.
+> - If you use App Service instead of Container Apps, the same env vars apply.
+
 ---
 
 **Status**: Phase 1 Complete ✅  
