@@ -10,27 +10,9 @@ services:
     env_file:
       - ./frontend/.env.local
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
     depends_on:
       - backend
-
-  # frontend-dev:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile.dev
-  #   ports:
-  #     - "3000:3000"
-  #   env_file:
-  #     - ./frontend/.env.local
-  #   environment:
-  #     - NODE_ENV=development
-  #   volumes:
-  #     - ./frontend:/app
-  #     - /app/node_modules
-  #     - /app/.next
-  #   mem_limit: 2g
-  #   depends_on:
-  #     - backend
 
   backend:
     build:
@@ -41,9 +23,8 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      - CORS_ALLOW_ORIGINS= *
+      - CORS_ALLOW_ORIGINS=*
  #     - CORS_ALLOW_ORIGINS=http://localhost:3000,http://localhost:3002,http://127.0.0.1:3000,http://127.0.0.1:3002
     restart: unless-stopped
 
-# volumes:
-#   frontend-dev-next:
+
