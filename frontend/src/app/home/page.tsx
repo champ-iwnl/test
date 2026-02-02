@@ -225,9 +225,9 @@ export default function HomePage() {
   }, [totalPoints, totalCheckpoint])
 
   const handleClaimCheckpoint = async (checkpoint: number) => {
-    if (!player) return
+    if (!player) return { reward_name: '' }
     try {
-      await rewardService.claimCheckpoint(player.id, checkpoint)
+      const response = await rewardService.claimCheckpoint(player.id, checkpoint)
       
       // Refresh profile to get updated claimed checkpoints from backend
       const updatedProfile = await authService.getProfile(player.id)
@@ -240,6 +240,8 @@ export default function HomePage() {
         total_points: updatedProfile.total_points,
         created_at: updatedProfile.created_at,
       })
+      
+      return { reward_name: response.reward_name }
     } catch (error: any) {
       // Extract error code from nested error object
       const errorCode = error?.response?.data?.error?.code
@@ -261,6 +263,7 @@ export default function HomePage() {
       } else {
         console.error('Failed to claim checkpoint:', errorMessage)
       }
+      return { reward_name: '' }
     }
   }
 
