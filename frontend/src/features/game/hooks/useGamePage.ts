@@ -19,6 +19,8 @@ export function useGamePage(options: UseGamePageOptions = {}) {
   const [mounted, setMounted] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isLoadingResult, setIsLoadingResult] = useState(false)
+  const [pendingTotalPoints, setPendingTotalPoints] = useState<number | null>(null)
 
   const spinWheel = useSpinWheel({
     onSpinComplete: () => {
@@ -48,28 +50,29 @@ export function useGamePage(options: UseGamePageOptions = {}) {
 
   // Actions
   const spin = useCallback(async () => {
-    if (spinWheel.isSpinning || !player) return
+    // Prevent spinning if already spinning, settling, or loading result
+    if (spinWheel.isSpinning || spinWheel.isSettling || isLoadingResult || !player) return
 
     setErrorMessage(null)
     setModalOpen(false)
+    setPendingTotalPoints(null)
+    setIsLoadingResult(true)
     spinWheel.startSpin()
 
     try {
       const response = await gameService.spin({ player_id: player.id })
       spinWheel.setSpinResult(response.points_gained)
-      setPlayer({
-        id: player.id,
-        nickname: player.nickname,
-        total_points: response.total_points_after,
-        created_at: player.created_at,
-      })
+      // Store new points but don't update player yet - wait for modal close
+      setPendingTotalPoints(response.total_points_after)
     } catch (error: any) {
       spinWheel.reset()
+      setIsLoadingResult(false)
+      setPendingTotalPoints(null)
       setErrorMessage(
         error?.response?.data?.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่'
       )
     }
-  }, [player, spinWheel, setPlayer])
+  }, [player, spinWheel, isLoadingResult])
 
   const handleCoinClick = useCallback(() => {
     if (spinWheel.isSpinning) {
@@ -81,8 +84,21 @@ export function useGamePage(options: UseGamePageOptions = {}) {
 
   const handleCloseModal = useCallback(() => {
     setModalOpen(false)
+    setIsLoadingResult(false)
+    
+    // Apply pending points update when closing modal
+    if (player && pendingTotalPoints !== null) {
+      setPlayer({
+        id: player.id,
+        nickname: player.nickname,
+        total_points: pendingTotalPoints,
+        created_at: player.created_at,
+      })
+      setPendingTotalPoints(null)
+    }
+    
     spinWheel.reset()
-  }, [spinWheel])
+  }, [spinWheel, player, pendingTotalPoints, setPlayer])
 
   return {
     // State
