@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { Container } from '@/components/layout/Container'
 import { CtaButton } from '@/components/ui/CtaButton'
 import { CtaFooter } from '@/components/ui/CtaFooter'
@@ -8,6 +9,13 @@ import { useNicknameForm } from '@/features/auth/hooks'
 export default function LandingPage() {
   const { register, errors, serverError, isPending, handleSubmit } =
     useNicknameForm()
+
+  useEffect(() => {
+    fetch('http://localhost:3001/health')
+      .then((res) => res.json())
+      .then((data) => console.log('Frontend connected to backend:', data))
+      .catch((err) => console.log('Backend connection failed:', err))
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">

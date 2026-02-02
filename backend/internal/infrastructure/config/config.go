@@ -142,7 +142,7 @@ func Init() *Config {
 		Server: ServerConfig{
 			Port:         getEnvInt("SERVER_PORT", 3000),
 			Env:          getEnv("SERVER_ENV", "development"),
-			AllowOrigins: getEnv("CORS_ALLOW_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000"),
+			AllowOrigins: getEnv("CORS_ALLOW_ORIGINS", "*"),
 		},
 		Log: LogConfig{
 			Level: getEnv("LOG_LEVEL", "info"),
