@@ -50,6 +50,11 @@ export function HeroCard({
   }
 
   const progressPercent = getProgressPosition(totalPoints)
+  const ICON_HIDE_THRESHOLD = 2
+  const shouldHideAvatar = CHECKPOINTS.some((checkpoint) => {
+    const pos = CUSTOM_POS[checkpoint] ?? (checkpoint / maxCheckpoint) * 100
+    return Math.abs(progressPercent - pos) <= ICON_HIDE_THRESHOLD
+  })
 
   const handleClaim = async (checkpoint: number) => {
     if (!onClaim) return
@@ -143,9 +148,11 @@ export function HeroCard({
                 <ProgressBar totalPoints={totalPoints} checkpoints={CHECKPOINTS} width={'100%'} height={9} showMarkers={false} progressPercent={progressPercent} />
 
                 {/* Player indicator aligned to track */}
-                <div style={{ position: 'absolute', left: `${progressPercent}%`, top: '4.5px', transform: 'translateX(-50%) translateY(-50%)', zIndex: 30 }}>
-                  <img src="/images/player.svg" alt="current-score" style={{ width: 20, height: 20 }} />
-                </div>
+                {!shouldHideAvatar && (
+                  <div style={{ position: 'absolute', left: `${progressPercent}%`, top: '4.5px', transform: 'translateX(-50%) translateY(-50%)', zIndex: 30 }}>
+                    <img src="/images/player.svg" alt="current-score" style={{ width: 20, height: 20 }} />
+                  </div>
+                )}
               </div>
 
               {/* Icons - positioned on top of the tube */}
