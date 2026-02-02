@@ -25,8 +25,31 @@ export function HeroCard({
 }: HeroCardProps) {
   const [claimingCheckpoint, setClaimingCheckpoint] = useState<number | null>(null)
   const maxCheckpoint = CHECKPOINTS[CHECKPOINTS.length - 1]
-  const progressPercent = Math.min((totalPoints / maxCheckpoint) * 100, 100)
-  const GROUP_WIDTH = 285.9998474121094
+  const GROUP_WIDTH = '100%'
+  const CUSTOM_POS: Record<number, number> = { 0: 0, 500: 10, 1000: 45, 10000: 100 }
+  const TRACK_LEFT_OFFSET = 'max(calc(10% - 34.5px), 0px)'
+  const TRACK_WIDTH = 'calc(100% - max(calc(10% - 34.5px), 0px))'
+
+  const getProgressPosition = (points: number) => {
+    const clamped = Math.max(0, Math.min(points, maxCheckpoint))
+    const sorted = [...CHECKPOINTS].sort((a, b) => a - b)
+    const anchors = [0, ...sorted]
+
+    for (let i = 0; i < anchors.length - 1; i += 1) {
+      const start = anchors[i]
+      const end = anchors[i + 1]
+      if (clamped <= end) {
+        const startPos = CUSTOM_POS[start] ?? (start / maxCheckpoint) * 100
+        const endPos = CUSTOM_POS[end] ?? (end / maxCheckpoint) * 100
+        const ratio = end === start ? 0 : (clamped - start) / (end - start)
+        return startPos + (endPos - startPos) * ratio
+      }
+    }
+
+    return 100
+  }
+
+  const progressPercent = getProgressPosition(totalPoints)
 
   const handleClaim = async (checkpoint: number) => {
     if (!onClaim) return
@@ -41,7 +64,7 @@ export function HeroCard({
   return (
     <div
       className={`rounded-2xl bg-white shadow-md border border-gray-100 overflow-hidden p-4 ${className}`}
-      style={{ width: '343px', height: '200px', ...style }}
+      style={{ width: '92%', maxWidth: '460px', height: '200px', ...style }}
     >
       {/* Header */}
       <div className="w-full flex justify-between items-end mb-2">
@@ -52,7 +75,7 @@ export function HeroCard({
             height: '22px',
             position: 'relative',
             top: '-1px',
-            left: '-20px',
+            left: '-6%',
             borderRadius: '0px 20px 20px 0px',
             background: 'linear-gradient(135deg, #DC2626 0%, #991B1B 100%)',
             fontFamily: 'Kanit',
@@ -116,7 +139,14 @@ export function HeroCard({
           {/* Progress tube */}
           <div style={{ position: 'relative', height: 50, marginTop: 16, display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: GROUP_WIDTH, position: 'relative' }}>
-              <ProgressBar totalPoints={totalPoints} checkpoints={CHECKPOINTS} width={'100%'} height={9} showMarkers={false} />
+              <div style={{ position: 'relative', width: TRACK_WIDTH, left: TRACK_LEFT_OFFSET }}>
+                <ProgressBar totalPoints={totalPoints} checkpoints={CHECKPOINTS} width={'100%'} height={9} showMarkers={false} progressPercent={progressPercent} />
+
+                {/* Player indicator aligned to track */}
+                <div style={{ position: 'absolute', left: `${progressPercent}%`, top: '4.5px', transform: 'translateX(-50%) translateY(-50%)', zIndex: 30 }}>
+                  <img src="/images/player.svg" alt="current-score" style={{ width: 20, height: 20 }} />
+                </div>
+              </div>
 
               {/* Icons - positioned on top of the tube */}
               {CHECKPOINTS.map((checkpoint) => {
@@ -178,10 +208,6 @@ export function HeroCard({
                 )
               })}
 
-              {/* Player indicator */}
-              <div style={{ position: 'absolute', left: `${progressPercent}%`, top: '4.5px', transform: 'translateX(-50%) translateY(-50%)', zIndex: 30 }}>
-                <img src="/images/player.svg" alt="current-score" style={{ width: 20, height: 20 }} />
-              </div>
             </div>
           </div>
 

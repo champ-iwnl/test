@@ -4,12 +4,14 @@ interface ProgressBarProps {
   width?: number | string
   height?: number
   showMarkers?: boolean
+  progressPercent?: number
   className?: string
 }
 
-export function ProgressBar({ totalPoints, checkpoints, width = '100%', height = 9, showMarkers = true, className = '' }: ProgressBarProps) {
+export function ProgressBar({ totalPoints, checkpoints, width = '100%', height = 9, showMarkers = true, progressPercent, className = '' }: ProgressBarProps) {
   const maxCheckpoint = checkpoints[checkpoints.length - 1] || 10000
-  const progressPercent = Math.min((totalPoints / maxCheckpoint) * 100, 100)
+  const computedPercent = Math.min((totalPoints / maxCheckpoint) * 100, 100)
+  const currentPercent = typeof progressPercent === 'number' ? progressPercent : computedPercent
 
   const trackStyle: React.CSSProperties = {
     height: `${height}px`,
@@ -31,7 +33,7 @@ export function ProgressBar({ totalPoints, checkpoints, width = '100%', height =
           className="transition-all duration-300"
           style={{
             height: '100%',
-            width: `${progressPercent}%`,
+            width: `${currentPercent}%`,
             borderRadius: '4px',
             background: 'linear-gradient(90deg, #FF8158 0%, #FF8902 159.71%)',
           }}
@@ -42,7 +44,7 @@ export function ProgressBar({ totalPoints, checkpoints, width = '100%', height =
             {/* Current position marker */}
             <div
               className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"
-              style={{ left: `${progressPercent}%` }}
+              style={{ left: `${currentPercent}%` }}
             >
               <div className="w-5 h-5 rounded-full shadow-md border-2 border-white" style={{ background: '#FF8158' }} />
             </div>
