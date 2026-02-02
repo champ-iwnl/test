@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -8,6 +9,7 @@ import (
 	"backend/internal/adapter/http/routes"
 	"backend/internal/infrastructure/config"
 	"backend/internal/infrastructure/database"
+	"backend/internal/infrastructure/database/migrations"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -57,6 +59,13 @@ func main() {
 		log.Fatalf("Database ping failed: %v", err)
 	}
 	log.Println("✓ Database connected successfully")
+
+	// Auto-seed database on startup
+	log.Println("Running database seeding...")
+	seeder := migrations.NewSeeder(db.DB(), cfg)
+	if err := seeder.SeedAll(context.Background()); err != nil {
+		log.Fatalf("Database seeding failed: %v", err)
+	}
 
 	// Create Fiber app
 	app := fiber.New()
