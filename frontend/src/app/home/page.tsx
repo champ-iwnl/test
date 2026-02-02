@@ -24,7 +24,7 @@ import type {
   RewardHistoryResponse,
   SpinLog,
   PersonalSpinLog,
-  RewardHistoryItem,
+  RewardHistoryItem as RewardHistoryItemType,
 } from '@/types/api'
 
 const CHECKPOINTS = [500, 1000, 5000, 10000]
@@ -41,7 +41,7 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'global' | 'personal' | 'rewards'>('global')
   const [globalHistory, setGlobalHistory] = useState<SpinLog[]>([])
   const [personalHistory, setPersonalHistory] = useState<PersonalSpinLog[]>([])
-  const [rewardHistory, setRewardHistory] = useState<RewardHistoryItem[]>([])
+  const [rewardHistory, setRewardHistory] = useState<RewardHistoryItemType[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
   // Pagination / lazy-load state
   const [globalLimit] = useState(20)
@@ -147,6 +147,7 @@ export default function HomePage() {
 
   const loadMorePersonal = async () => {
     if (loadingMorePersonal) return
+    if (!player) return
     if (!shouldLoadMorePersonal) return
     setLoadingMorePersonal(true)
     setPersonalLoadError(null)
@@ -228,7 +229,7 @@ export default function HomePage() {
     try {
       await rewardService.claimCheckpoint(player.id, checkpoint)
       // Update claimed checkpoints
-      setClaimedCheckpoints((prev) => [...new Set([...prev, checkpoint])])
+      setClaimedCheckpoints((prev) => Array.from(new Set([...prev, checkpoint])))
     } catch (error) {
       console.error('Failed to claim checkpoint:', error)
       // TODO: Show error toast

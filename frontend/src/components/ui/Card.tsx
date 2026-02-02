@@ -4,9 +4,10 @@ interface CardProps {
   children: React.ReactNode
   className?: string
   noPadding?: boolean
+  style?: React.CSSProperties
 }
 
-export function Card({ children, className, noPadding = false }: CardProps) {
+export function Card({ children, className, noPadding = false, style }: CardProps) {
   return (
     <div
       className={cn(
@@ -14,6 +15,7 @@ export function Card({ children, className, noPadding = false }: CardProps) {
         !noPadding && 'p-4',
         className
       )}
+      style={style}
     >
       {children}
     </div>

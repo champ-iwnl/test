@@ -1,65 +1,14 @@
 'use client'
 
 import { Container } from '@/components/layout/Container'
-import { NicknameForm } from '@/features/auth/components/NicknameForm'
 import { CtaButton } from '@/components/ui/CtaButton'
 import { CtaFooter } from '@/components/ui/CtaFooter'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { useMutation } from '@tanstack/react-query'
-import { authService } from '@/services/auth.service'
-import { usePlayerStore } from '@/store/playerStore'
-
-// Validation Schema
-const nicknameSchema = z.object({
-  nickname: z
-    .string()
-    .min(2, { message: 'ชื่อต้องมีความยาวอย่างน้อย 2 ตัวอักษร' })
-    .max(20, { message: 'ชื่อต้องไม่เกิน 20 ตัวอักษร' })
-    .regex(/^[a-zA-Z0-9_]+$/, { message: 'ใช้ได้เฉพาะตัวอักษรภาษาอังกฤษ ตัวเลข และขีดล่าง (_)' }),
-})
-
-type NicknameFormData = z.infer<typeof nicknameSchema>
+import { useNicknameForm } from '@/features/auth/hooks'
 
 export default function LandingPage() {
-  const router = useRouter()
-  const setPlayer = usePlayerStore((state) => state.setPlayer)
-  const [serverError, setServerError] = useState<string | null>(null)
+  const { register, errors, serverError, isPending, handleSubmit } =
+    useNicknameForm()
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<NicknameFormData>({
-    resolver: zodResolver(nicknameSchema),
-  })
-
-  const enterMutation = useMutation({
-    mutationFn: (data: NicknameFormData) => authService.enter(data.nickname),
-    onSuccess: (data) => {
-      // Backend returns flat EnterResponse, map to Player shape used in store
-      setPlayer({
-        id: data.id,
-        nickname: data.nickname,
-        total_points: data.total_points,
-        created_at: data.created_at,
-      })
-      router.push('/home')
-    },
-    onError: (error: any) => {
-      // Handle backend error message
-      const message = error.response?.data?.error || 'เกิดข้อผิดพลาด กรุณาลองใหม่'
-      setServerError(message)
-    },
-  })
-
-  const onSubmit = (data: NicknameFormData) => {
-    setServerError(null)
-    enterMutation.mutate(data)
-  }
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <Container>
@@ -116,10 +65,9 @@ export default function LandingPage() {
         <div className="absolute" style={{ top: '382px', left: '16px', width: '345px' }}>
           <input
             form="nickname-form"
-            name="nickname"
             placeholder="Test 234"
             {...register('nickname')}
-            disabled={enterMutation.isPending}
+            disabled={isPending}
             autoComplete="off"
             className="w-full h-[48px] border border-[#D9D9D9] bg-white px-4 text-[14px] font-kanit focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/20 disabled:cursor-not-allowed disabled:opacity-50"
             style={{
@@ -140,7 +88,7 @@ export default function LandingPage() {
         )}
 
         {/* Hidden form submit */}
-        <form id="nickname-form" onSubmit={handleSubmit(onSubmit)} className="hidden" />
+        <form id="nickname-form" onSubmit={handleSubmit} className="hidden" />
 
         {/* Footer */}
         <CtaFooter>

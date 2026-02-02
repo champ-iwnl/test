@@ -1,0 +1,106 @@
+'use client'
+
+import Link from 'next/link'
+import { Container } from '@/components/layout/Container'
+import { CtaButton } from '@/components/ui/CtaButton'
+import { CtaFooter } from '@/components/ui/CtaFooter'
+import { HeroCard } from '@/features/home/components/HeroCard'
+import { HistorySection } from '@/features/home/components/HistorySection'
+import { useHomePage, useHistory } from '@/features/home/hooks'
+
+export default function HomePage() {
+  const {
+    mounted,
+    loadingProfile,
+    player,
+    totalPoints,
+    claimedCheckpoints,
+    activeTab,
+    setActiveTab,
+    handleClaimCheckpoint,
+  } = useHomePage()
+
+  const { globalHistory, personalHistory, rewardHistory, sentinelRef } =
+    useHistory({
+      playerId: player?.id,
+      activeTab,
+    })
+
+  if (!mounted) return null
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <Container className="flex flex-col">
+        {/* Header section with gray background */}
+        <div
+          style={{
+            width: '100%',
+            height: '227px',
+            backgroundColor: '#dddddd',
+            position: 'relative',
+            boxSizing: 'border-box',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            opacity: 1,
+          }}
+        >
+          <HeroCard
+            totalPoints={totalPoints}
+            claimedCheckpoints={claimedCheckpoints}
+            loading={loadingProfile}
+            onClaim={handleClaimCheckpoint}
+          />
+        </div>
+
+        {/* Scrollable content area */}
+        <div
+          className="flex-1 overflow-y-auto pb-20 scrollbar-hide no-scrollbar"
+          style={{
+            height: 'calc(812px - 227px - 80px)',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
+        >
+          <HistorySection
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            globalHistory={globalHistory.data}
+            personalHistory={personalHistory.data}
+            rewardHistory={rewardHistory.data}
+            playerNickname={player?.nickname ?? '-'}
+            loading={loadingProfile || globalHistory.loading}
+            loadingMore={
+              activeTab === 'global'
+                ? globalHistory.loading
+                : personalHistory.loading
+            }
+            error={
+              activeTab === 'global'
+                ? globalHistory.error
+                : personalHistory.error
+            }
+            hasMore={
+              activeTab === 'global'
+                ? globalHistory.hasMore
+                : personalHistory.hasMore
+            }
+            onRetry={
+              activeTab === 'global'
+                ? globalHistory.retry
+                : personalHistory.retry
+            }
+            sentinelRef={sentinelRef}
+          />
+        </div>
+
+        {/* Footer */}
+        <CtaFooter>
+          <Link href="/game">
+            <CtaButton>ไปเล่นเกม</CtaButton>
+          </Link>
+        </CtaFooter>
+      </Container>
+    </div>
+  )
+}
