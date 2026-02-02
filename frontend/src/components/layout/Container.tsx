@@ -13,7 +13,8 @@ export function Container({ children, className }: ContainerProps) {
         className
       )}
       style={{
-        width: '375px',
+        width: '100%',
+        maxWidth: '500px',
         height: '812px',
         opacity: 1,
       }}

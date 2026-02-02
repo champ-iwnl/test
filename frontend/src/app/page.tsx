@@ -21,7 +21,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <Container>
         {/* Header Title */}
-        <div className="absolute" style={{ top: '276px', left: '15px' }}>
+        <div className="absolute" style={{ top: '34%', left: '4%' }}>
           <h1
             className="text-black"
             style={{
@@ -39,8 +39,8 @@ export default function LandingPage() {
         <div
           className="absolute"
           style={{
-            top: '320px',
-            left: '15px',
+            top: '39.4%',
+            left: '4%',
             fontFamily: 'Kanit',
             fontWeight: 400,
             fontSize: '14px',
@@ -56,8 +56,8 @@ export default function LandingPage() {
         <div
           className="absolute"
           style={{
-            top: '358px',
-            left: '16px',
+            top: '44.1%',
+            left: '4.3%',
             fontFamily: 'Kanit',
             fontSize: '14px',
             fontWeight: 400,
@@ -70,7 +70,7 @@ export default function LandingPage() {
         </div>
 
         {/* Input field */}
-        <div className="absolute" style={{ top: '382px', left: '16px', width: '345px' }}>
+        <div className="absolute" style={{ top: '47%', left: '4.3%', width: '92%' }}>
           <input
             form="nickname-form"
             placeholder="Test 234"
@@ -89,7 +89,7 @@ export default function LandingPage() {
         {(errors.nickname?.message || serverError) && (
           <div
             className="absolute text-sm text-red-500"
-            style={{ top: '434px', left: '16px' }}
+            style={{ top: '53.4%', left: '4.3%' }}
           >
             {errors.nickname?.message || serverError}
           </div>
