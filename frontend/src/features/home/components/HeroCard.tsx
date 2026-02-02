@@ -195,6 +195,15 @@ export function HeroCard({
               const leftStyle = isStart ? '0%' : isEnd ? '100%' : `${pos}%`
               const transformStyle = isStart ? 'translateX(0) translateY(0)' : isEnd ? 'translateX(-100%) translateY(0)' : 'translateX(-50%) translateY(0)'
 
+              // While loading profile, show all buttons as locked to prevent flash
+              if (loading) {
+                return (
+                  <div key={`btn-${checkpoint}`} style={{ position: 'absolute', left: leftStyle, top: 0, transform: transformStyle }}>
+                    <ClaimButton checkpointIndex={idx + 1} status="locked" loading={false} onClaim={() => {}} />
+                  </div>
+                )
+              }
+
               const isClaimed = claimedCheckpoints.includes(checkpoint)
               const isEligible = totalPoints >= checkpoint
               const status: 'claimed' | 'claimable' | 'locked' = isClaimed ? 'claimed' : isEligible ? 'claimable' : 'locked'

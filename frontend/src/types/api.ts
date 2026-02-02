@@ -65,13 +65,15 @@ export interface PersonalHistoryResponse {
 
 // Rewards
 export interface ClaimRequest {
-  checkpoint_points: number
+  player_id: string
+  checkpoint_val: number
 }
 
 export interface ClaimResponse {
-  success: boolean
-  message: string
-  points_claimed: number
+  id: string
+  checkpoint_val: number
+  reward_name: string
+  claimed_at: string
 }
 
 export interface RewardHistoryItem {

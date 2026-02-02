@@ -65,7 +65,7 @@ func main() {
 	// Enable CORS for frontend origin(s) (configurable via CORS_ALLOW_ORIGINS)
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     cfg.Server.AllowOrigins,
-		AllowCredentials: true,
+		AllowCredentials: false,
 	}))
 
 	// Middleware
