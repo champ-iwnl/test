@@ -3,13 +3,14 @@ import Image from 'next/image'
 import { ScoreDisplay } from './ScoreDisplay'
 import { ProgressBar } from './ProgressBar'
 import { ClaimButton } from './ClaimButton'
+import { ClaimSuccessModal } from './ClaimSuccessModal'
 
 const CHECKPOINTS = [500, 1000, 10000]
 
 interface HeroCardProps {
   totalPoints: number
   claimedCheckpoints: number[]
-  onClaim?: (checkpoint: number) => Promise<void>
+  onClaim?: (checkpoint: number) => Promise<{ reward_name: string }>
   loading?: boolean
   className?: string
   style?: React.CSSProperties
@@ -24,6 +25,8 @@ export function HeroCard({
   style = {},
 }: HeroCardProps) {
   const [claimingCheckpoint, setClaimingCheckpoint] = useState<number | null>(null)
+  const [showClaimSuccess, setShowClaimSuccess] = useState(false)
+  const [claimedRewardName, setClaimedRewardName] = useState('')
   const maxCheckpoint = CHECKPOINTS[CHECKPOINTS.length - 1]
   const GROUP_WIDTH = '100%'
   const CUSTOM_POS: Record<number, number> = { 0: 0, 500: 10, 1000: 45, 10000: 100 }
@@ -61,7 +64,9 @@ export function HeroCard({
     if (!onClaim) return
     try {
       setClaimingCheckpoint(checkpoint)
-      await onClaim(checkpoint)
+      const response = await onClaim(checkpoint)
+      setClaimedRewardName(response.reward_name)
+      setShowClaimSuccess(true)
     } finally {
       setClaimingCheckpoint(null)
     }
@@ -251,6 +256,12 @@ export function HeroCard({
           </div>
         </div>
       </div>
+
+      <ClaimSuccessModal
+        isOpen={showClaimSuccess}
+        rewardName={claimedRewardName}
+        onClose={() => setShowClaimSuccess(false)}
+      />
     </div>
   )
 }
