@@ -9,7 +9,6 @@ import { CtaFooter } from '@/components/ui/CtaFooter'
 import { Tabs } from '@/components/ui/Tabs'
 import { authService } from '@/services/auth.service'
 import { historyService } from '@/services/history.service'
-import { rewardService } from '@/services/reward.service'
 import { usePlayerStore } from '@/store/playerStore'
 import { formatPoints, formatDate } from '@/utils/formatters'
 import { Card } from '@/components/ui/Card'
@@ -18,13 +17,12 @@ import { GlobalHistoryItem } from '@/features/history/components/GlobalHistoryIt
 import { PersonalHistoryItem } from '@/features/history/components/PersonalHistoryItem'
 import { RewardHistoryItem } from '@/features/history/components/RewardHistoryItem'
 import { InfiniteScrollSentinel } from '@/features/history/components/InfiniteScrollSentinel'
+import { useRewardClaim, useRewardHistory } from '@/features/reward/hooks'
 import type {
   GlobalHistoryResponse,
   PersonalHistoryResponse,
-  RewardHistoryResponse,
   SpinLog,
   PersonalSpinLog,
-  RewardHistoryItem as RewardHistoryItemType,
 } from '@/types/api'
 
 const CHECKPOINTS = [500, 1000, 5000, 10000]
@@ -41,7 +39,6 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'global' | 'personal' | 'rewards'>('global')
   const [globalHistory, setGlobalHistory] = useState<SpinLog[]>([])
   const [personalHistory, setPersonalHistory] = useState<PersonalSpinLog[]>([])
-  const [rewardHistory, setRewardHistory] = useState<RewardHistoryItemType[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
   // Pagination / lazy-load state
   const [globalLimit] = useState(20)
@@ -57,6 +54,13 @@ export default function HomePage() {
   const [loadingMorePersonal, setLoadingMorePersonal] = useState(false)
   const [personalLoadError, setPersonalLoadError] = useState<string | null>(null)
   const [personalRetryCount, setPersonalRetryCount] = useState(0)
+
+  const { rewardHistory, loadingRewardHistory } = useRewardHistory(player?.id, activeTab === 'rewards')
+  const { handleClaimCheckpoint } = useRewardClaim({
+    player,
+    setPlayer,
+    setClaimedCheckpoints,
+  })
 
   const sentinelRef = useRef<HTMLDivElement | null>(null)
 
@@ -91,6 +95,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!player) return
+    if (activeTab === 'rewards') return
 
     setLoadingHistory(true)
     const fetcher = async () => {
@@ -106,10 +111,6 @@ export default function HomePage() {
         const response: PersonalHistoryResponse = await historyService.getPersonalHistory(player.id, personalLimit, 0)
         setPersonalHistory(response.data || [])
         setPersonalTotal(response.total ?? null)
-      }
-      if (activeTab === 'rewards') {
-        const response: RewardHistoryResponse = await rewardService.getHistory(player.id)
-        setRewardHistory(response.data || [])
       }
     }
 
@@ -224,49 +225,6 @@ export default function HomePage() {
     return Math.min((totalPoints / totalCheckpoint) * 100, 100)
   }, [totalPoints, totalCheckpoint])
 
-  const handleClaimCheckpoint = async (checkpoint: number) => {
-    if (!player) return { reward_name: '' }
-    try {
-      const response = await rewardService.claimCheckpoint(player.id, checkpoint)
-      
-      // Refresh profile to get updated claimed checkpoints from backend
-      const updatedProfile = await authService.getProfile(player.id)
-      setClaimedCheckpoints(updatedProfile.claimed_checkpoints || [])
-      
-      // Also update player store with new points if changed
-      setPlayer({
-        id: updatedProfile.id,
-        nickname: updatedProfile.nickname,
-        total_points: updatedProfile.total_points,
-        created_at: updatedProfile.created_at,
-      })
-      
-      return { reward_name: response.reward_name }
-    } catch (error: any) {
-      // Extract error code from nested error object
-      const errorCode = error?.response?.data?.error?.code
-      const errorMessage = error?.response?.data?.error?.message || 'ไม่สามารถรับรางวัลได้'
-      
-      // Handle already claimed error - refresh to get latest data
-      if (errorCode === 'ALREADY_CLAIMED') {
-        try {
-          const updatedProfile = await authService.getProfile(player.id)
-          setClaimedCheckpoints(updatedProfile.claimed_checkpoints || [])
-        } catch {
-          // If refresh fails, fallback to local state
-          setClaimedCheckpoints((prev) => {
-            const newSet = new Set([...prev, checkpoint])
-            return Array.from(newSet)
-          })
-        }
-        console.warn('Reward already claimed:', checkpoint)
-      } else {
-        console.error('Failed to claim checkpoint:', errorMessage)
-      }
-      return { reward_name: '' }
-    }
-  }
-
   if (!mounted) return null
 
   return (
@@ -315,7 +273,7 @@ export default function HomePage() {
 
           {/* List items */}
           <div className="mt-3">
-            {loadingProfile || loadingHistory ? (
+            {loadingProfile || loadingHistory || loadingRewardHistory ? (
               <div className="text-center text-sm text-gray-400 py-4">กำลังโหลด...</div>
             ) : null}
 
@@ -327,7 +285,7 @@ export default function HomePage() {
               <div className="text-center text-sm text-gray-400 py-4">ยังไม่มีประวัติของฉัน</div>
             ) : null}
 
-            {!loadingHistory && activeTab === 'rewards' && rewardHistory.length === 0 ? (
+            {!loadingRewardHistory && activeTab === 'rewards' && rewardHistory.length === 0 ? (
               <div className="text-center text-sm text-gray-400 py-4">ยังไม่มีรางวัลที่ได้รับ</div>
             ) : null}
 
