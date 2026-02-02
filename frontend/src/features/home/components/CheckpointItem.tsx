@@ -1,4 +1,4 @@
-import { ClaimButton } from './ClaimButton'
+import { ClaimButton } from '@/features/reward/components/ClaimButton'
 
 interface CheckpointItemProps {
   checkpoint: number

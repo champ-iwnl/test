@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import { ScoreDisplay } from './ScoreDisplay'
 import { ProgressBar } from './ProgressBar'
-import { ClaimButton } from './ClaimButton'
-import { ClaimSuccessModal } from './ClaimSuccessModal'
+import { ClaimButton } from '@/features/reward/components/ClaimButton'
+import { ClaimSuccessModal } from '@/features/reward/components/ClaimSuccessModal'
 
 const CHECKPOINTS = [500, 1000, 10000]
 
