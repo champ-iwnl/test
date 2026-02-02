@@ -49,7 +49,8 @@ export function HeroCard({
     return 100
   }
 
-  const progressPercent = getProgressPosition(totalPoints)
+  const progressPercent = Math.min(100, Math.max(0, getProgressPosition(totalPoints)))
+  const avatarTransform = progressPercent <= 0 ? 'translateX(0) translateY(-50%)' : progressPercent >= 100 ? 'translateX(-100%) translateY(-50%)' : 'translateX(-50%) translateY(-50%)'
   const ICON_HIDE_THRESHOLD = 2
   const shouldHideAvatar = CHECKPOINTS.some((checkpoint) => {
     const pos = CUSTOM_POS[checkpoint] ?? (checkpoint / maxCheckpoint) * 100
@@ -69,7 +70,7 @@ export function HeroCard({
   return (
     <div
       className={`rounded-2xl bg-white shadow-md border border-gray-100 overflow-hidden p-4 ${className}`}
-      style={{ width: '92%', maxWidth: '460px', height: '200px', ...style }}
+      style={{ width: 'clamp(300px, 92%, 500px)', height: '200px', ...style }}
     >
       {/* Header */}
       <div className="w-full flex justify-between items-end mb-2">
@@ -149,7 +150,7 @@ export function HeroCard({
 
                 {/* Player indicator aligned to track */}
                 {!shouldHideAvatar && (
-                  <div style={{ position: 'absolute', left: `${progressPercent}%`, top: '4.5px', transform: 'translateX(-50%) translateY(-50%)', zIndex: 30 }}>
+                  <div style={{ position: 'absolute', left: `${progressPercent}%`, top: '4.5px', transform: avatarTransform, zIndex: 30 }}>
                     <img src="/images/player.svg" alt="current-score" style={{ width: 20, height: 20 }} />
                   </div>
                 )}

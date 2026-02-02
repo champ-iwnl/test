@@ -14,6 +14,7 @@ export function Container({ children, className }: ContainerProps) {
       )}
       style={{
         width: '100%',
+        minWidth: '300px',
         maxWidth: '500px',
         height: '812px',
         opacity: 1,
