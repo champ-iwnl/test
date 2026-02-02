@@ -47,6 +47,7 @@ export default function GamePage() {
             <SpinActionButton
               isSpinning={spinWheel.isSpinning}
               onClick={spinWheel.isSpinning ? spinWheel.stopSpin : spin}
+              disabled={spinWheel.isSettling}
             />
           </div>
         </div>
