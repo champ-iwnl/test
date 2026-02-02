@@ -1,7 +1,12 @@
 import axios from 'axios'
+import { getAPIConfig } from '@/config'
+
+// ดึง API config จาก .env
+const apiConfig = getAPIConfig()
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+  baseURL: apiConfig.url,
+  timeout: apiConfig.timeout,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -10,7 +15,20 @@ const api = axios.create({
 // Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const config = error.config
+
+    // Retry logic
+    if (!config._retryCount) {
+      config._retryCount = 0
+    }
+
+    if (config._retryCount < apiConfig.retryCount && !error.response) {
+      config._retryCount++
+      await new Promise((resolve) => setTimeout(resolve, apiConfig.retryDelay))
+      return api(config)
+    }
+
     // Handle specific error cases if needed
     if (error.response) {
       // Server responded with error code

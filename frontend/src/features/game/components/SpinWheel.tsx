@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { SpinButton } from './SpinButton'
+import { useSpinWheelConfig } from '@/config'
 
 interface SpinWheelProps {
   rotation: number
@@ -18,16 +19,22 @@ export function SpinWheel({
   disabled = false,
   className = '',
 }: SpinWheelProps) {
+  // ใช้ config จาก YAML (public/config/app.yaml)
+  const { duration, easing } = useSpinWheelConfig()
+
+  // Generate transition style based on config
+  const transitionStyle = isSettling
+    ? `transform ${duration}ms ${easing}`
+    : 'transform 75ms linear'
+
   return (
     <div className={`relative flex items-center justify-center ${className}`}>
       {/* Rotating wheel */}
       <div
-        className={
-          isSettling
-            ? 'transition-transform duration-[2200ms] ease-[cubic-bezier(0.15,0.85,0.2,1)]'
-            : 'transition-transform duration-75 linear'
-        }
-        style={{ transform: `rotate(${rotation}deg)` }}
+        style={{
+          transform: `rotate(${rotation}deg)`,
+          transition: transitionStyle,
+        }}
       >
         <Image src="/images/spin-wheel.svg" alt="Spin wheel" width={320} height={320} priority />
       </div>

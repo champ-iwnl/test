@@ -1,13 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-
-const SPIN_CONFIG = {
-  speedPerFrame: 26,
-  settleDuration: 1800,
-  extraRotations: 3,
-  pointerAngle: 270,
-  jitterMaxAngle: 44,
-  jitterEdgeBias: 0.85,
-}
+import { useSpinWheelConfig } from '@/config'
 
 const SEGMENT_CENTER_ANGLES: Record<number, number> = {
   1000: 315,
@@ -24,6 +16,9 @@ interface UseSpinWheelOptions {
 }
 
 export function useSpinWheel(options?: UseSpinWheelOptions) {
+  // ใช้ config จาก YAML (public/config/app.yaml)
+  const spinConfig = useSpinWheelConfig()
+
   const [isSpinning, setIsSpinning] = useState(false)
   const [isSettling, setIsSettling] = useState(false)
   const [isStopping, setIsStopping] = useState(false)
@@ -39,7 +34,7 @@ export function useSpinWheel(options?: UseSpinWheelOptions) {
 
   const startSpinLoop = () => {
     const loop = () => {
-      rotationRef.current = (rotationRef.current + SPIN_CONFIG.speedPerFrame) % 360
+      rotationRef.current = (rotationRef.current + spinConfig.speedPerFrame) % 360
       setRotation(rotationRef.current)
       rafRef.current = requestAnimationFrame(loop)
     }
@@ -59,16 +54,16 @@ export function useSpinWheel(options?: UseSpinWheelOptions) {
     const fallbackCenter = (360 - index * segmentAngle - segmentAngle / 2 + 360) % 360
     const centerAngle = SEGMENT_CENTER_ANGLES[points] ?? fallbackCenter
     const raw = Math.random()
-    const bias = Math.pow(raw, SPIN_CONFIG.jitterEdgeBias)
+    const bias = Math.pow(raw, spinConfig.jitterEdgeBias)
     const sign = Math.random() < 0.5 ? -1 : 1
-    const jitter = sign * bias * SPIN_CONFIG.jitterMaxAngle
+    const jitter = sign * bias * spinConfig.jitterMaxAngle
     const targetAngle = (centerAngle + jitter + 360) % 360
 
     const current = rotationRef.current
     const normalized = (current % 360 + 360) % 360
     const currentCenter = (targetAngle + normalized) % 360
-    const delta = (SPIN_CONFIG.pointerAngle - currentCenter + 360) % 360
-    const finalRotation = current + 360 * SPIN_CONFIG.extraRotations + delta
+    const delta = (spinConfig.pointerAngle - currentCenter + 360) % 360
+    const finalRotation = current + 360 * spinConfig.extraRotations + delta
 
     setIsSettling(true)
     setRotation(finalRotation)
@@ -79,7 +74,7 @@ export function useSpinWheel(options?: UseSpinWheelOptions) {
       if (options?.onSpinComplete) {
         options.onSpinComplete(points)
       }
-    }, SPIN_CONFIG.settleDuration)
+    }, spinConfig.duration)
   }
 
   const startSpin = () => {
