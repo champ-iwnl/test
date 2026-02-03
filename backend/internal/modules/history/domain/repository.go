@@ -13,22 +13,21 @@ type SpinLogRepository interface {
 	// FindByID loads spin log by ID
 	FindByID(ctx context.Context, id *SpinLogID) (*SpinLog, error)
 
-	// ListAll returns paginated global history with player info
-	ListAll(ctx context.Context, params shared.PaginationParams) (*SpinLogListResult, error)
+	// ListAllCursor returns cursor-paginated global history with player info
+	ListAllCursor(ctx context.Context, params shared.CursorParams) (*SpinLogCursorResult, error)
 
-	// ListByPlayer returns paginated history for specific player
-	ListByPlayer(ctx context.Context, playerID string, params shared.PaginationParams) (*SpinLogListResult, error)
+	// ListByPlayerCursor returns cursor-paginated history for specific player
+	ListByPlayerCursor(ctx context.Context, playerID string, params shared.CursorParams) (*SpinLogCursorResult, error)
 
 	// CountTodayByPlayer counts today's spins for a player (for daily limit)
 	CountTodayByPlayer(ctx context.Context, playerID string) (int, error)
 }
 
-// SpinLogListResult contains paginated results with metadata
-type SpinLogListResult struct {
-	Data   []*SpinLogWithPlayer
-	Total  int64
-	Limit  int
-	Offset int
+// SpinLogCursorResult contains cursor-paginated results
+type SpinLogCursorResult struct {
+	Data       []*SpinLogWithPlayer
+	NextCursor string
+	HasMore    bool
 }
 
 // SpinLogWithPlayer includes player nickname for display

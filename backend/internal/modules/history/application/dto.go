@@ -4,18 +4,22 @@ import (
 	"time"
 )
 
-// Global History Request
+// ========== Requests ==========
+
+// Global History Request (cursor-based)
 type GetGlobalRequest struct {
-	Limit  int `query:"limit"`
-	Offset int `query:"offset"`
+	Limit  int    `query:"limit"`
+	Cursor string `query:"cursor"`
 }
 
-// Personal History Request
+// Personal History Request (cursor-based)
 type GetPersonalRequest struct {
 	PlayerID string `params:"player_id"`
 	Limit    int    `query:"limit"`
-	Offset   int    `query:"offset"`
+	Cursor   string `query:"cursor"`
 }
+
+// ========== DTOs ==========
 
 // SpinLogDTO for global history (includes player name)
 type GlobalSpinLogDTO struct {
@@ -34,18 +38,18 @@ type PersonalSpinLogDTO struct {
 	CreatedAt    time.Time `json:"created_at"`
 }
 
-// GlobalHistoryResponse
+// ========== Responses (Cursor-based) ==========
+
+// GlobalHistoryResponse (cursor-based)
 type GlobalHistoryResponse struct {
-	Data   []GlobalSpinLogDTO `json:"data"`
-	Total  int64              `json:"total"`
-	Limit  int                `json:"limit"`
-	Offset int                `json:"offset"`
+	Data       []GlobalSpinLogDTO `json:"data"`
+	NextCursor string             `json:"next_cursor,omitempty"`
+	HasMore    bool               `json:"has_more"`
 }
 
-// PersonalHistoryResponse
+// PersonalHistoryResponse (cursor-based)
 type PersonalHistoryResponse struct {
-	Data   []PersonalSpinLogDTO `json:"data"`
-	Total  int64                `json:"total"`
-	Limit  int                  `json:"limit"`
-	Offset int                  `json:"offset"`
+	Data       []PersonalSpinLogDTO `json:"data"`
+	NextCursor string               `json:"next_cursor,omitempty"`
+	HasMore    bool                 `json:"has_more"`
 }

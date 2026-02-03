@@ -2,16 +2,18 @@ import api from '@/lib/axios'
 import { GlobalHistoryResponse, PersonalHistoryResponse } from '@/types/api'
 
 export const historyService = {
-  getGlobalHistory: async (limit = 100, offset = 0) => {
+  // Global history (cursor-based)
+  getGlobalHistory: async (limit = 20, cursor?: string) => {
     const response = await api.get<GlobalHistoryResponse>('/history/global', {
-      params: { limit, offset },
+      params: { limit, ...(cursor && { cursor }) },
     })
     return response.data
   },
 
-  getPersonalHistory: async (playerId: string, limit = 100, offset = 0) => {
+  // Personal history (cursor-based)
+  getPersonalHistory: async (playerId: string, limit = 20, cursor?: string) => {
     const response = await api.get<PersonalHistoryResponse>(`/history/${playerId}`, {
-      params: { limit, offset },
+      params: { limit, ...(cursor && { cursor }) },
     })
     return response.data
   },

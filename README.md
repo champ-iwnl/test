@@ -1,8 +1,17 @@
+## 🌐 Currently Deployed URLs
+- **Frontend**: http://20.24.205.5:8000
+- **Backend API**: http://20.24.205.5:8080/
+- **Swagger Docs**: http://20.24.205.5:8080/swagger/index.html
+
+
+
+
 # 🎯 Spin Head - Fullstack Application
 
 **Architecture**: DDD + Clean Architecture  
 **Frontend**: Next.js 16 (App Router) + Tailwind  
 **Backend**: Go (Fiber) + GORM + PostgreSQL
+
 
 ## ✨ Features
 - Player enter/profile
@@ -174,11 +183,6 @@ NEXT_PUBLIC_API_URL=http://<VM_PUBLIC_IP>:8080
 ```
 docker compose -f docker-compose.prod.yml up -d
 ```
-
-### URLs (Currently Deployed)
-- **Frontend**: http://20.24.205.5:8000
-- **Backend API**: http://20.24.205.5:8080/
-- **Swagger Docs**: http://20.24.205.5:8080/swagger/index.html
 
 ### URLs (Generic Template)
 - Frontend: http://<VM_PUBLIC_IP>:3000
