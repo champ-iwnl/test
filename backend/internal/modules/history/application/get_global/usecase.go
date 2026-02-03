@@ -1,19 +1,19 @@
 package get_global
 
 import (
-	"backend/internal/infrastructure/config"
+	"context"
+
 	"backend/internal/modules/history/application"
 	"backend/internal/modules/history/domain"
 	shared "backend/internal/shared/domain"
-	"context"
 )
 
 type UseCase struct {
 	spinLogRepo   domain.SpinLogRepository
-	paginationCfg *config.PaginationConfig
+	paginationCfg shared.PaginationConfig
 }
 
-func New(repo domain.SpinLogRepository, cfg *config.PaginationConfig) *UseCase {
+func New(repo domain.SpinLogRepository, cfg shared.PaginationConfig) *UseCase {
 	return &UseCase{
 		spinLogRepo:   repo,
 		paginationCfg: cfg,
@@ -22,11 +22,7 @@ func New(repo domain.SpinLogRepository, cfg *config.PaginationConfig) *UseCase {
 
 // Execute handles cursor-based pagination
 func (uc *UseCase) Execute(ctx context.Context, req application.GetGlobalRequest) (*application.GlobalHistoryResponse, error) {
-	params := shared.NewCursorParams(req.Limit, req.Cursor, shared.PaginationConfig{
-		DefaultLimit:  uc.paginationCfg.DefaultLimit,
-		MaxLimit:      uc.paginationCfg.MaxLimit,
-		DefaultOffset: uc.paginationCfg.DefaultOffset,
-	})
+	params := shared.NewCursorParams(req.Limit, req.Cursor, uc.paginationCfg)
 	result, err := uc.spinLogRepo.ListAllCursor(ctx, params)
 	if err != nil {
 		return nil, err

@@ -30,14 +30,14 @@ services:
       - SWAGGER_EXTERNAL_URL=${SWAGGER_EXTERNAL_URL:-http://localhost:8081}
     restart: unless-stopped
 
-  migrate:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    env_file:
-      - .env
-    command: ["go", "run", "cmd/migrate/main.go", "up"]
-    depends_on:
-      - backend
-    profiles:
-      - migrate
+  # migrate:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - .env
+  #   command: ["go", "run", "cmd/migrate/main.go", "up"]
+  #   depends_on:
+  #     - backend
+  #   profiles:
+  #     - migrate

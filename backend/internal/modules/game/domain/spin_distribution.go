@@ -2,8 +2,6 @@ package domain
 
 import (
 	"errors"
-
-	"backend/internal/infrastructure/config"
 )
 
 // SpinDistributionItem represents a weighted outcome
@@ -18,8 +16,8 @@ type SpinDistribution struct {
 	totalWeight int
 }
 
-// NewSpinDistribution creates from config
-func NewSpinDistribution(items []config.SpinDistributionItem) (*SpinDistribution, error) {
+// NewSpinDistribution creates from domain items (no config dependency)
+func NewSpinDistribution(items []SpinDistributionItem) (*SpinDistribution, error) {
 	if len(items) == 0 {
 		return nil, errors.New("distribution must have at least one item")
 	}

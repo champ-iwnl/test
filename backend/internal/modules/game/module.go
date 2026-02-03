@@ -9,7 +9,7 @@ import (
 	"backend/internal/modules/game/domain"
 	historydomain "backend/internal/modules/history/domain"
 	playerdomain "backend/internal/modules/player/domain"
-	
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -25,8 +25,17 @@ func NewModule(
 	playerRepo playerdomain.PlayerRepository,
 	spinLogRepo historydomain.SpinLogRepository,
 ) (*Module, error) {
-	// Create spin distribution from config
-	spinDist, err := domain.NewSpinDistribution(cfg.Game.Spin.Distribution)
+	// Convert config items to domain items (keeps domain pure)
+	domainItems := make([]domain.SpinDistributionItem, len(cfg.Game.Spin.Distribution))
+	for i, item := range cfg.Game.Spin.Distribution {
+		domainItems[i] = domain.SpinDistributionItem{
+			Points: item.Points,
+			Weight: item.Weight,
+		}
+	}
+
+	// Create spin distribution from domain items
+	spinDist, err := domain.NewSpinDistribution(domainItems)
 	if err != nil {
 		return nil, err
 	}

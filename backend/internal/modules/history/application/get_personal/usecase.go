@@ -1,20 +1,20 @@
 package get_personal
 
 import (
-	"backend/internal/infrastructure/config"
+	"context"
+	"errors"
+
 	"backend/internal/modules/history/application"
 	"backend/internal/modules/history/domain"
 	shared "backend/internal/shared/domain"
-	"context"
-	"errors"
 )
 
 type UseCase struct {
 	spinLogRepo   domain.SpinLogRepository
-	paginationCfg *config.PaginationConfig
+	paginationCfg shared.PaginationConfig
 }
 
-func New(repo domain.SpinLogRepository, cfg *config.PaginationConfig) *UseCase {
+func New(repo domain.SpinLogRepository, cfg shared.PaginationConfig) *UseCase {
 	return &UseCase{
 		spinLogRepo:   repo,
 		paginationCfg: cfg,
@@ -27,11 +27,7 @@ func (uc *UseCase) Execute(ctx context.Context, req application.GetPersonalReque
 		return nil, errors.New("player ID is required")
 	}
 
-	params := shared.NewCursorParams(req.Limit, req.Cursor, shared.PaginationConfig{
-		DefaultLimit:  uc.paginationCfg.DefaultLimit,
-		MaxLimit:      uc.paginationCfg.MaxLimit,
-		DefaultOffset: uc.paginationCfg.DefaultOffset,
-	})
+	params := shared.NewCursorParams(req.Limit, req.Cursor, uc.paginationCfg)
 	result, err := uc.spinLogRepo.ListByPlayerCursor(ctx, req.PlayerID, params)
 	if err != nil {
 		return nil, err

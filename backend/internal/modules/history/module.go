@@ -6,6 +6,7 @@ import (
 	"backend/internal/modules/history/adapter/repository"
 	"backend/internal/modules/history/application/get_global"
 	"backend/internal/modules/history/application/get_personal"
+	shared "backend/internal/shared/domain"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -19,8 +20,15 @@ type Module struct {
 func NewModule(db *gorm.DB, cfg *config.Config) *Module {
 	repo := repository.NewSpinLogRepositoryGorm(db)
 
-	getGlobalUC := get_global.New(repo, &cfg.Pagination)
-	getPersonalUC := get_personal.New(repo, &cfg.Pagination)
+	// Convert infra config to shared domain config (keeps application layer clean)
+	paginationCfg := shared.PaginationConfig{
+		DefaultLimit:  cfg.Pagination.DefaultLimit,
+		MaxLimit:      cfg.Pagination.MaxLimit,
+		DefaultOffset: cfg.Pagination.DefaultOffset,
+	}
+
+	getGlobalUC := get_global.New(repo, paginationCfg)
+	getPersonalUC := get_personal.New(repo, paginationCfg)
 
 	h := handler.NewHistoryHandler(getGlobalUC, getPersonalUC)
 
