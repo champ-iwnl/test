@@ -149,6 +149,33 @@ func (m *Migrator) Version() (uint, bool, error) {
 	return m.migrate.Version()
 }
 
+// Force sets the migration version without running migrations
+func (m *Migrator) Force(version string) error {
+	// Parse version as int
+	var v int
+	_, err := fmt.Sscanf(version, "%d", &v)
+	if err != nil {
+		return fmt.Errorf("invalid version format: %w", err)
+	}
+
+	if err := m.migrate.Force(v); err != nil {
+		return fmt.Errorf("failed to force version: %w", err)
+	}
+
+	log.Printf("[Migrator] ✓ Forced migration version to %d", v)
+	return nil
+}
+
+// Drop drops all tables and migration tracking
+func (m *Migrator) Drop() error {
+	if err := m.migrate.Drop(); err != nil {
+		return fmt.Errorf("failed to drop database: %w", err)
+	}
+
+	log.Println("[Migrator] ✓ Dropped all tables and migration tracking")
+	return nil
+}
+
 // recreateMigrator recreates the migrate instance after a drop operation
 func (m *Migrator) recreateMigrator() error {
 	// Close the current instance
