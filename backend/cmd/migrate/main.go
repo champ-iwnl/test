@@ -58,6 +58,22 @@ func main() {
 		}
 		log.Println("[Migrate] ✓ Database reset completed successfully")
 
+	case "force":
+		if len(os.Args) < 3 {
+			log.Fatalf("[Migrate] Force requires a version argument")
+		}
+		version := os.Args[2]
+		if err := migrator.Force(version); err != nil {
+			log.Fatalf("[Migrate] Force failed: %v", err)
+		}
+		log.Printf("[Migrate] ✓ Forced migration version to %s", version)
+
+	case "drop":
+		if err := migrator.Drop(); err != nil {
+			log.Fatalf("[Migrate] Drop failed: %v", err)
+		}
+		log.Println("[Migrate] ✓ Database dropped successfully")
+
 	case "seed":
 		seeder := migrations.NewSeeder(db.DB(), cfg)
 		if err := seeder.SeedAll(context.Background()); err != nil {
@@ -90,11 +106,15 @@ func printUsage() {
 	fmt.Println("  migrate up      - Run all pending migrations")
 	fmt.Println("  migrate down    - Rollback last migration")
 	fmt.Println("  migrate reset   - Drop all tables and run all migrations")
+	fmt.Println("  migrate force <version> - Force migration version")
+	fmt.Println("  migrate drop    - Drop all tables and migration tracking")
 	fmt.Println("  migrate seed    - Seed database with initial data")
 	fmt.Println("  migrate version - Show current migration version")
 	fmt.Println()
 	fmt.Println("Examples:")
 	fmt.Println("  go run cmd/migrate/main.go up")
 	fmt.Println("  go run cmd/migrate/main.go reset")
+	fmt.Println("  go run cmd/migrate/main.go force 4")
+	fmt.Println("  go run cmd/migrate/main.go drop")
 	fmt.Println("  go run cmd/migrate/main.go seed")
 }
