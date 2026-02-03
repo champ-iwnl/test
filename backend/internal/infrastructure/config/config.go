@@ -64,17 +64,24 @@ var config *Config
 
 // Init loads configuration from .env file using godotenv
 func Init() *Config {
-	// Try to load .env from current directory first
-	envPath := ".env"
-	if _, err := os.Stat(envPath); os.IsNotExist(err) {
-		// Try parent directory
-		envPath = "../.env"
+	// Look for .env files in common locations and load only if present
+	candidates := []string{".env", "../.env"}
+	var foundPath string
+	for _, p := range candidates {
+		if _, err := os.Stat(p); err == nil {
+			foundPath = p
+			break
+		}
 	}
-
-	if err := godotenv.Load(envPath); err != nil {
-		log.Printf("[Config] Note: Could not load %s, using environment variables or defaults", envPath)
+	if foundPath != "" {
+		if err := godotenv.Load(foundPath); err != nil {
+			log.Printf("[Config] Note: Found %s but failed to load: %v", foundPath, err)
+		} else {
+			log.Printf("[Config] Loaded .env from %s", foundPath)
+		}
 	} else {
-		log.Printf("[Config] Loaded .env from %s", envPath)
+		// No .env file found; environment variables (from docker/env) will be used
+		log.Printf("[Config] No .env file found (checked .env and ../.env); using environment variables or defaults")
 	}
 
 	// Also try to load from executable directory

@@ -4,6 +4,10 @@ FROM node:22-alpine AS builder
 # Set working directory
 WORKDIR /app
 
+# Build-time arguments for Next.js (NEXT_PUBLIC_* must be available at build time)
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 # Copy package files
 COPY package*.json ./
 
@@ -13,7 +17,7 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the application (env vars are inlined into JS bundle)
 RUN npm run build
 
 # Production stage

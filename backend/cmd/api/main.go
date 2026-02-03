@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/url"
+	"os"
 	"strings"
 
-	_ "backend/docs" // This is required for swagger
+	docs "backend/docs"
 	"backend/internal/adapter/http/routes"
 	"backend/internal/infrastructure/config"
 	"backend/internal/infrastructure/database"
@@ -92,6 +94,31 @@ func main() {
 	// Start server
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)
 	log.Printf("Starting Spin Head API v1.0.0 on %s\n", addr)
+
+	// Show Swagger UI URL. Prefer explicit external URL via SWAGGER_EXTERNAL_URL env var when running behind NAT/proxy/docker
+	swaggerExternal := os.Getenv("SWAGGER_EXTERNAL_URL")
+	if swaggerExternal != "" {
+		swaggerExternal = strings.TrimRight(swaggerExternal, "/")
+		// Update generated swagger host/schemes at runtime so Swagger UI issues requests to the correct external host
+		if u, err := url.Parse(swaggerExternal); err == nil {
+			// set host (host[:port]) and scheme
+			docs.SwaggerInfo.Host = u.Host
+			if u.Scheme != "" {
+				docs.SwaggerInfo.Schemes = []string{u.Scheme}
+			}
+			log.Printf("Swagger UI: %s/swagger/", swaggerExternal)
+		} else {
+			log.Printf("Swagger UI: %s/swagger/ (invalid SWAGGER_EXTERNAL_URL)", swaggerExternal)
+		}
+	} else {
+		// Fallback to internal URL (container-local)
+		// Do not hardcode host in the swagger spec so Swagger UI will use the current origin
+		// (this helps "Try it" work when accessed via different hostnames / IPs)
+		docs.SwaggerInfo.Host = ""
+		docs.SwaggerInfo.Schemes = []string{}
+		log.Printf("Swagger UI (internal): http://localhost:%d/swagger/ (may be mapped to different host port)", cfg.Server.Port)
+	}
+
 	if err := app.Listen(addr); err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}

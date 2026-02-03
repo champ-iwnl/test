@@ -1,0 +1,650 @@
+{
+    "schemes": ["http"],
+    "swagger": "2.0",
+    "info": {
+        "description": "A spin game API built with Go and Fiber",
+        "title": "Spin Head API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/game/spin": {
+            "post": {
+                "description": "Perform a spin for the player (max 10 spins/day)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Game"
+                ],
+                "summary": "Execute a spin",
+                "parameters": [
+                    {
+                        "description": "Spin request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/application.SpinRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/application.SpinResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/application.SpinErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Player not found",
+                        "schema": {
+                            "$ref": "#/definitions/application.SpinErrorResponse"
+                        }
+                    },
+                    "429": {
+                        "description": "Daily limit exceeded",
+                        "schema": {
+                            "$ref": "#/definitions/application.SpinErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/application.SpinErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/history/global": {
+            "get": {
+                "description": "Get paginated global spin history with player nicknames",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "History"
+                ],
+                "summary": "Get global spin history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Number of items to skip",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/application.GlobalHistoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/history/{player_id}": {
+            "get": {
+                "description": "Get paginated spin history for a specific player",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "History"
+                ],
+                "summary": "Get personal spin history",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Player ID",
+                        "name": "player_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Number of items to skip",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/application.PersonalHistoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/players/enter": {
+            "post": {
+                "description": "Enter an existing player or create a new one with the given nickname",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Players"
+                ],
+                "summary": "Enter or resume a player",
+                "parameters": [
+                    {
+                        "description": "Player enter request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/application.EnterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Existing player found",
+                        "schema": {
+                            "$ref": "#/definitions/application.EnterResponse"
+                        }
+                    },
+                    "201": {
+                        "description": "New player created",
+                        "schema": {
+                            "$ref": "#/definitions/application.EnterResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/players/{id}": {
+            "get": {
+                "description": "Get player profile information by player ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Players"
+                ],
+                "summary": "Get player profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Player ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Player profile",
+                        "schema": {
+                            "$ref": "#/definitions/application.ProfileResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Player not found",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/rewards/claim": {
+            "post": {
+                "description": "Claim a reward when player reaches a checkpoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Rewards"
+                ],
+                "summary": "Claim reward at checkpoint",
+                "parameters": [
+                    {
+                        "description": "Claim reward request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/application.ClaimRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/application.ClaimResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Insufficient points or invalid checkpoint",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Player not found",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "409": {
+                        "description": "Already claimed",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/rewards/{player_id}": {
+            "get": {
+                "description": "Get all rewards claimed by a player",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Rewards"
+                ],
+                "summary": "Get reward claim history",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Player ID",
+                        "name": "player_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/application.GetHistoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid player ID",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "application.ClaimRequest": {
+            "type": "object",
+            "required": [
+                "checkpoint_val",
+                "player_id"
+            ],
+            "properties": {
+                "checkpoint_val": {
+                    "type": "integer"
+                },
+                "player_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "application.ClaimResponse": {
+            "type": "object",
+            "properties": {
+                "checkpoint_val": {
+                    "type": "integer"
+                },
+                "claimed_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "reward_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "application.EnterRequest": {
+            "type": "object",
+            "required": [
+                "nickname"
+            ],
+            "properties": {
+                "nickname": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 3
+                }
+            }
+        },
+        "application.EnterResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_new": {
+                    "description": "Only for enter",
+                    "type": "boolean"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "total_points": {
+                    "type": "integer"
+                }
+            }
+        },
+        "application.GetHistoryResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/application.RewardHistoryDTO"
+                    }
+                }
+            }
+        },
+        "application.GlobalHistoryResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/application.GlobalSpinLogDTO"
+                    }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "application.GlobalSpinLogDTO": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "player_nickname": {
+                    "type": "string"
+                },
+                "points_gained": {
+                    "type": "integer"
+                },
+                "source": {
+                    "type": "string"
+                }
+            }
+        },
+        "application.PersonalHistoryResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/application.PersonalSpinLogDTO"
+                    }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "application.PersonalSpinLogDTO": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "points_gained": {
+                    "type": "integer"
+                },
+                "source": {
+                    "type": "string"
+                }
+            }
+        },
+        "application.ProfileResponse": {
+            "type": "object",
+            "properties": {
+                "claimed_checkpoints": {
+                    "description": "Phase 6",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "total_points": {
+                    "type": "integer"
+                }
+            }
+        },
+        "application.RewardHistoryDTO": {
+            "type": "object",
+            "properties": {
+                "checkpoint_val": {
+                    "type": "integer"
+                },
+                "claimed_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "reward_description": {
+                    "type": "string"
+                },
+                "reward_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "application.SpinErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "DAILY_LIMIT_EXCEEDED"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Daily spin limit reached"
+                },
+                "remaining_spins": {
+                    "type": "integer",
+                    "example": 0
+                }
+            }
+        },
+        "application.SpinRequest": {
+            "type": "object",
+            "properties": {
+                "player_id": {
+                    "type": "string",
+                    "example": "uuid-123"
+                }
+            }
+        },
+        "application.SpinResponse": {
+            "type": "object",
+            "properties": {
+                "points_gained": {
+                    "type": "integer",
+                    "example": 500
+                },
+                "spin_id": {
+                    "type": "string",
+                    "example": "uuid-456"
+                },
+                "total_points_after": {
+                    "type": "integer",
+                    "example": 1500
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

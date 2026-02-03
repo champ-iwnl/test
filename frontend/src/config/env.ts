@@ -10,8 +10,10 @@ import { APISettings, AppSettings, HomePageSettings } from './types'
  * ค่า default จะใช้เมื่อไม่มีการตั้งค่าใน .env
  */
 export function getAPIConfig(): APISettings {
+  const url = process.env.NEXT_PUBLIC_API_URL || ''
+  console.log('NEXT_PUBLIC_API_URL:', url) // Debug
   return {
-    url: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+    url,
     timeout: parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || '10000', 10),
     retryCount: parseInt(process.env.NEXT_PUBLIC_API_RETRY_COUNT || '3', 10),
     retryDelay: parseInt(process.env.NEXT_PUBLIC_API_RETRY_DELAY || '1000', 10),
