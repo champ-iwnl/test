@@ -1,57 +1,31 @@
-# Spin Head - Fullstack Application
+# 🎯 Spin Head - Fullstack Application
 
-**Architecture**: Full DDD + Clean Architecture  
-**Frontend**: (TBD)  
-**Backend**: Go + Fiber + GORM + PostgreSQL
+**Architecture**: DDD + Clean Architecture  
+**Frontend**: Next.js 16 (App Router) + Tailwind  
+**Backend**: Go (Fiber) + PostgreSQL
 
-## Project Structure
+## ✨ Features
+- Player enter/profile
+- Spin game with points
+- Claim rewards at checkpoints
+- Global history / Personal history / Reward history
+- Infinite scroll history
 
-```
-.
-├── backend/                    # Go API Server
-│   ├── cmd/                    # Application entrypoints
-│   ├── internal/               # Private application code
-│   │   ├── shared/             # Shared primitives
-│   │   ├── infrastructure/     # Technical implementations
-│   │   └── modules/            # Bounded contexts
-│   ├── pkg/                    # Reusable libraries
-│   ├── migrations/             # Database migrations
-│   ├── go.mod, go.sum          # Dependencies
-│   └── .env                    # Configuration
-│
-├── frontend/                   # React/Vue/Next.js (TBD)
-│
-└── docs/                       # Shared documentation
-```
-
-## Backend Setup
+## 🧰 Installation (Local)
 
 ### Prerequisites
 - Go 1.21+
-- PostgreSQL 14+
-- Fiber v2.52
+- Node.js 18+
+- Docker + Docker Compose
+- PostgreSQL (local) or Azure PostgreSQL
 
-### Quick Start
+### 1) Configure Environment
+Single `.env` at repo root (shared by frontend + backend). Example keys:
 
-```bash
-cd backend
-
-# Load .env
-cp .env.example .env
-
-# Install dependencies
-go mod download
-
-# Run the API server
-go run ./cmd/api/main.go
 ```
+NEXT_PUBLIC_API_URL=http://localhost:8081
+NEXT_PUBLIC_API_TIMEOUT=10000
 
-Server will run on `http://localhost:3001`
-
-### Environment Variables
-
-```bash
-# Database
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
@@ -59,166 +33,138 @@ DB_PASSWORD=yourpassword
 DB_NAME=spinhead
 DB_SSLMODE=disable
 
-# Server
 SERVER_PORT=3001
 SERVER_ENV=development
 LOG_LEVEL=info
 ```
 
-### Build
-
-```bash
-cd backend
-go build -o bin/api.exe ./cmd/api
-./bin/api.exe
+### 2) Run Backend (Docker)
 ```
-
-### Health Checks
-
-```bash
-curl http://localhost:3001/health
-curl http://localhost:3001/health/db
-curl http://localhost:3001/api/info
+docker compose up -d backend
 ```
+API: http://localhost:8081
 
-## Frontend Setup
-
-### Environment Configuration
-
-Frontend uses different environment files for different deployment modes:
-
-#### Production (Docker)
-- **File**: `frontend/.env.local`
-- **Usage**: Production build with Docker
-- **API URL**: `http://backend:3001` (internal Docker network)
-
-#### Development (Docker)
-- **File**: `frontend/.env.development`
-- **Usage**: Development mode with hot reload
-- **API URL**: `http://localhost:3001` (host machine)
-- **Port**: `3001` (to avoid conflict with production)
-
-#### Local Development
-- **File**: `frontend/.env.local`
-- **Usage**: Local development with `npm run dev`
-- **API URL**: `http://localhost:3001`
-
-### Environment Variables
-
-```bash
-# API Configuration
-NEXT_PUBLIC_API_URL=http://localhost:3001
-NEXT_PUBLIC_API_TIMEOUT=10000
-NEXT_PUBLIC_API_RETRY_COUNT=3
-NEXT_PUBLIC_API_RETRY_DELAY=1000
-
-# App Settings
-NEXT_PUBLIC_APP_NAME="Spin Game"
-NEXT_PUBLIC_APP_DESCRIPTION="หมุนวงล้อลุ้นรางวัล"
-NEXT_PUBLIC_APP_VERSION="1.0.0"
-
-# Home Page Settings
-NEXT_PUBLIC_HISTORY_PAGE_SIZE=10
-NEXT_PUBLIC_PREFETCH_SIZE=5
+### 3) Run Frontend (Local)
 ```
-
-### Running Frontend
-
-#### Production Build
-```bash
-docker-compose up frontend
-# Access at http://localhost:3000
-```
-
-#### Development with Hot Reload
-```bash
-docker-compose up frontend-dev
-# Access at http://localhost:3001
-```
-
-#### Local Development
-```bash
 cd frontend
 npm install
 npm run dev
-# Access at http://localhost:3000
+```
+Web: http://localhost:3000
+
+## 🧱 Architecture Overview
+Full DDD & Clean Architecture details: [docs/overview.md](docs/overview.md)
+
+**Layers**
+- **Presentation**: HTTP handlers (Fiber)
+- **Application**: use-cases, DTOs, orchestration
+- **Domain**: entities, aggregates, value objects, domain services
+- **Infrastructure**: DB, logger, external services
+
+**Key patterns**
+- Bounded contexts (player, history, reward, game)
+- Application / Domain / Infrastructure separation
+- Repository + Domain Events
+- Value Objects for consistency
+
+## 🗂️ Database Design (ER Thinking)
+ออกแบบ ER ก่อนเขียนโค้ดเพื่อกำหนดความสัมพันธ์และ business rules:
+- `players` (1) — (N) `spin_logs`
+- `reward_config` (1) — (N) `reward_transactions`
+- `players` (1) — (N) `reward_transactions`
+
+เหตุผล:
+- `spin_logs` แยกจาก `players` เพื่อเก็บประวัติและวิเคราะห์สถิติ
+- `reward_transactions` แยกจาก `reward_config` เพื่อบันทึกการรับรางวัลตามเวลา
+- Index และ pagination รองรับ query ขนาดใหญ่
+
+## 🚀 Deployment (Pull Docker + Azure PostgreSQL)
+
+### แนวคิด
+- Build & push images จาก local
+- VM ดึง image มา run ด้วย docker-compose
+- ใช้ Azure PostgreSQL เป็น external DB
+
+### ขั้นตอน
+1) Build & push images
+```
+./build-and-push.sh
 ```
 
-## Architecture
+2) ตั้งค่า `.env` บน VM (ใช้ Azure DB)
+```
+DB_HOST=<azure-postgres-host>
+DB_PORT=5432
+DB_USER=<user>
+DB_PASSWORD=<password>
+DB_NAME=<db>
+DB_SSLMODE=require
 
-See [docs/overview.md](docs/overview.md) for full DDD architecture documentation.
+NEXT_PUBLIC_API_URL=http://<VM_PUBLIC_IP>:8080
+```
 
-### Key Patterns
+3) Pull + run บน VM
+```
+docker compose -f docker-compose.prod.yml up -d
+```
 
-- **Domain-Driven Design** with bounded contexts
-- **Clean Architecture** with strict layer boundaries
-- **Repository Pattern** for data access
-- **Domain Events** for inter-context communication
-- **Value Objects** for type safety
-- **Aggregates** for consistency boundaries
+### URLs
+- Frontend: http://<VM_PUBLIC_IP>:3000
+- Backend API: http://<VM_PUBLIC_IP>:8080
+- Swagger: http://<VM_PUBLIC_IP>:8080/swagger/index.html
 
-## Testing
-
-```bash
+## ✅ Testing
+```
 cd backend
-
-# Run tests
 go test ./...
-
-# With coverage
-go test -cover ./...
 ```
 
-## Documentation
+## 🗃️ Database Management
 
-- [Architecture Overview](docs/overview.md) - Full DDD patterns (1,300+ lines)
-- [Project Structure](backend/PROJECT_STRUCTURE.md) - Directory layout and responsibilities
-- [Phase 1 Setup](backend/PHASE_1_SETUP.md) - Initial infrastructure completion
+### Local Development (Direct Go)
+```bash
+# Reset database (drop all + migrate up + seed)
+make backend-reset
 
-## Azure Deployment (Container Apps)
+# Run migrations up
+make backend-migrate-up
 
-This setup deploys **backend** and **frontend** as separate containers, with **Azure Database for PostgreSQL**.
+# Seed initial data
+make backend-seed
 
-### Prerequisites
-- Azure subscription
-- Azure Container Registry (ACR) for images
-- Azure Database for PostgreSQL (Flexible Server)
+# Check migration version
+cd backend && go run cmd/migrate/main.go version
+```
 
-### Steps (high level)
-1. **Build and push images**
-	- Build backend image from [backend/Dockerfile](backend/Dockerfile)
-	- Build frontend image from [frontend/Dockerfile](frontend/Dockerfile)
-	- Push both images to ACR
+### Production/Docker (Recommended)
+```bash
+# Reset database (drop all + migrate up + seed)
+make backend-reset-docker
 
-2. **Provision database**
-	- Create Azure Database for PostgreSQL
-	- Allow network access from Container Apps
-	- Set DB credentials for the backend app
+# Run migrations up
+make backend-migrate-up-docker
 
-3. **Deploy backend (Container App)**
-	- Image: backend image in ACR
-	- Port: 3001
-	- Required env vars:
-	  - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_SSLMODE=require`
-	  - `SERVER_PORT=3001`, `SERVER_ENV=production`
-	  - `CORS_ALLOW_ORIGINS` set to your frontend URL
+# Seed initial data
+make backend-seed-docker
 
-4. **Deploy frontend (Container App)**
-	- Image: frontend image in ACR
-	- Port: 3000
-	- Env vars:
-	  - `NEXT_PUBLIC_API_URL` = backend public URL
-	  - Other `NEXT_PUBLIC_*` values as needed
+# Or run directly with docker-compose
+docker-compose exec backend go run cmd/migrate/main.go reset
+```
 
-5. **Verify**
-	- Backend health: `/health`
-	- Swagger UI: `/swagger/index.html`
+### Manual Seeding (CSV)
+```bash
+# ใช้สำหรับ seed ข้อมูลจำนวนมากจาก CSV
+./seed.sh
+```
 
-> Notes:
-> - For custom domains, use Container Apps domain binding and update CORS/`NEXT_PUBLIC_API_URL` accordingly.
-> - If you use App Service instead of Container Apps, the same env vars apply.
-
----
-
-**Status**: Phase 1 Complete ✅  
-**Next**: Phase 2 - Domain Model Implementation 🚀
+## 🧩 Project Structure
+```
+.
+├── backend/                    # Go API Server
+│   ├── cmd/
+│   ├── internal/
+│   ├── migrations/
+│   └── pkg/
+├── frontend/                   # Next.js app
+└── docs/                       # Architecture and tasks
+```
