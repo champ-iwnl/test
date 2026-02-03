@@ -175,7 +175,12 @@ NEXT_PUBLIC_API_URL=http://<VM_PUBLIC_IP>:8080
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-### URLs
+### URLs (Currently Deployed)
+- **Frontend**: http://20.24.205.5:8000
+- **Backend API**: http://20.24.205.5:8080/
+- **Swagger Docs**: http://20.24.205.5:8080/swagger/index.html
+
+### URLs (Generic Template)
 - Frontend: http://<VM_PUBLIC_IP>:3000
 - Backend API: http://<VM_PUBLIC_IP>:8080
 - Swagger: http://<VM_PUBLIC_IP>:8080/swagger/index.html
