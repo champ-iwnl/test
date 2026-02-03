@@ -13,8 +13,8 @@ export function RewardHistoryItem({ item, className }: RewardHistoryItemProps) {
     <HistoryListItem
       avatar={<Image src="/images/avatar.svg" alt="avatar" width={48} height={48} style={{ borderRadius: 32, display: 'block' }} />}
       title={item.reward_name}
-      subtitle="ได้รับเมื่อ"
-      timestamp={formatDate(item.claimed_at)}
+      subtitle={`ได้รับเมื่อ ${formatDate(item.claimed_at)}`}
+      timestamp=""
       className={className}
     />
   )

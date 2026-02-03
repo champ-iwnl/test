@@ -12,6 +12,7 @@ interface HeroCardProps {
   claimedCheckpoints: number[]
   onClaim?: (checkpoint: number) => Promise<{ reward_name: string }>
   loading?: boolean
+  displayName?: string
   className?: string
   style?: React.CSSProperties
 }
@@ -21,6 +22,7 @@ export function HeroCard({
   claimedCheckpoints,
   onClaim,
   loading = false,
+  displayName,
   className = '',
   style = {},
 }: HeroCardProps) {
@@ -75,8 +77,28 @@ export function HeroCard({
   return (
     <div
       className={`rounded-2xl bg-white shadow-md border border-gray-100 overflow-hidden p-4 ${className}`}
-      style={{ width: 'clamp(300px, 92%, 500px)', height: '200px', ...style }}
+      style={{ width: 'clamp(300px, 92%, 500px)', height: '200px', position: 'relative', ...style }}
     >
+      {displayName ? (
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            top: 12,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            fontFamily: 'Kanit',
+            fontSize: '12px',
+            fontWeight: 400,
+            color: '#9CA3AF',
+            opacity: 0.35,
+            pointerEvents: 'none',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {displayName}
+        </div>
+      ) : null}
       {/* Header */}
       <div className="w-full flex justify-between items-end mb-2">
         {/* Share button */}
