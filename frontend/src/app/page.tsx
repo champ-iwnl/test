@@ -28,8 +28,7 @@ export default function LandingPage() {
               fontSize: '32px',
               fontWeight: 500,
               lineHeight: '100%',
-              letterSpacing: '0px',
-            }}
+              letterSpacing: '0px'}}
           >
             Nextzy Test (Full Stack)
           </h1>
@@ -41,13 +40,12 @@ export default function LandingPage() {
           style={{
             top: '39.4%',
             left: '4%',
-            fontFamily: 'Kanit',
+            
             fontWeight: 400,
             fontSize: '14px',
             lineHeight: '120%',
             color: '#979797',
-            opacity: 1,
-          }}
+            opacity: 1}}
         >
           เกมสะสมคะแนน
         </div>
@@ -58,13 +56,12 @@ export default function LandingPage() {
           style={{
             top: '44.1%',
             left: '4.3%',
-            fontFamily: 'Kanit',
+            
             fontSize: '14px',
             fontWeight: 400,
             lineHeight: '120%',
             color: '#979797',
-            opacity: 1,
-          }}
+            opacity: 1}}
         >
           ชื่อสำหรับเล่น (Nickname)
         </div>
@@ -80,8 +77,7 @@ export default function LandingPage() {
             className="w-full h-[48px] border border-[#D9D9D9] bg-white px-4 text-[14px] font-kanit focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/20 disabled:cursor-not-allowed disabled:opacity-50"
             style={{
               borderRadius: '8px',
-              opacity: 1,
-            }}
+              opacity: 1}}
           />
         </div>
 

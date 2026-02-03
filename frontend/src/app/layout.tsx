@@ -1,6 +1,13 @@
 import type { Metadata } from 'next'
+import { Kanit } from 'next/font/google'
 import { Providers } from '@/components/providers'
 import './globals.css'
+
+const kanit = Kanit({
+  subsets: ['thai', 'latin'],
+  weight: ['400', '500', '700'],
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Spin Game',
@@ -14,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="font-kanit">
+      <body className={kanit.className}>
         <Providers>
           {children}
         </Providers>

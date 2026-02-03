@@ -19,8 +19,7 @@ export function CheckpointItem({
   onClaim,
   loading = false,
   className = '',
-  showLabel = true,
-}: CheckpointItemProps) {
+  showLabel = true}: CheckpointItemProps) {
   const isUnlocked = totalPoints >= checkpoint
   const status = claimed ? 'claimed' : isUnlocked ? 'claimable' : 'locked'
 
@@ -31,11 +30,10 @@ export function CheckpointItem({
         <div
           className="text-gray-600 text-[11px]"
           style={{
-            fontFamily: 'Kanit',
+            
             fontSize: '11px',
             fontWeight: 400,
-            lineHeight: '120%',
-          }}
+            lineHeight: '120%'}}
         >
           ครบ {checkpoint.toLocaleString()}
         </div>

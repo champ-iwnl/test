@@ -11,14 +11,13 @@ export function ScoreDisplay({ totalPoints, totalCheckpoint = 10000, className =
         <div
           className="text-red-600"
           style={{
-            fontFamily: 'Kanit',
+            
             fontWeight: 600,
             fontSize: '24px',
             lineHeight: '24px',
             letterSpacing: '0px',
             textAlign: 'right',
-            color: '#FF2428',
-          }}
+            color: '#FF2428'}}
         >
           {`${totalPoints.toLocaleString()}/${totalCheckpoint.toLocaleString()}`}
         </div>
