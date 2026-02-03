@@ -156,7 +156,7 @@ export function HeroCard({
                 {/* Player indicator aligned to track */}
                 {!shouldHideAvatar && (
                   <div style={{ position: 'absolute', left: `${progressPercent}%`, top: '4.5px', transform: avatarTransform, zIndex: 30 }}>
-                    <img src="/images/player.svg" alt="current-score" style={{ width: 20, height: 20 }} />
+                    <Image src="/images/player.svg" alt="current-score" width={20} height={20} />
                   </div>
                 )}
               </div>
@@ -187,14 +187,14 @@ export function HeroCard({
                         height: 32
                       }}
                     >
-                      <img 
-                        src="/images/spin-coin.svg" 
-                        alt="coin" 
-                        style={{ 
-                          width: '100%', 
-                          height: '100%',
+                      <Image
+                        src="/images/spin-coin.svg"
+                        alt="coin"
+                        width={32}
+                        height={32}
+                        style={{
                           display: 'block'
-                        }} 
+                        }}
                       />
                     </div>
                   )
@@ -213,9 +213,9 @@ export function HeroCard({
                     }}
                   >
                     {isEligible && !isClaimed ? (
-                      <img src="/images/check-geen.svg" alt="eligible" style={{ width: 20, height: 20 }} />
+                      <Image src="/images/check-geen.svg" alt="eligible" width={20} height={20} />
                     ) : (
-                      <img src="/images/check-gray.svg" alt="claimed-or-locked" style={{ width: 20, height: 20 }} />
+                      <Image src="/images/check-gray.svg" alt="claimed-or-locked" width={20} height={20} />
                     )}
                   </div>
                 )

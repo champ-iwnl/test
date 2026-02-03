@@ -1,0 +1,36 @@
+# Production Docker Compose
+# ใช้สำหรับ deploy บน server (ไม่ต้อง build, แค่ pull image)
+
+services:
+  frontend:
+    image: ppasinb/test-frontend:latest
+    ports:
+      - "8000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    image: ppasinb/test-backend:latest
+    ports:
+      - "8080:3001"
+    environment:
+      # Database
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME:-postgres}
+      - DB_SSLMODE=${DB_SSLMODE:-require}
+      # Server
+      - SERVER_PORT=3001
+      - SERVER_ENV=production
+      # Logging
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      # CORS & Swagger
+      - CORS_ALLOW_ORIGINS=*
+      - SWAGGER_EXTERNAL_URL=${SWAGGER_EXTERNAL_URL}
+    restart: unless-stopped

@@ -1,4 +1,5 @@
 import { Card } from '@/components/ui/Card'
+import Image from 'next/image'
 
 interface HistoryListItemProps {
   avatar?: React.ReactNode
@@ -16,10 +17,12 @@ export function HistoryListItem({
   className = '',
 }: HistoryListItemProps) {
   const fallbackAvatar = (
-    <img
+    <Image
       src="/images/avatar.svg"
       alt="avatar"
-      style={{ width: 48, height: 48, borderRadius: 32, display: 'block' }}
+      width={48}
+      height={48}
+      style={{ borderRadius: 32, display: 'block' }}
     />
   )
 

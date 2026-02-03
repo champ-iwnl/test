@@ -1,5 +1,6 @@
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
+import Image from 'next/image'
 
 interface ClaimSuccessModalProps {
   isOpen: boolean
@@ -21,13 +22,11 @@ export function ClaimSuccessModal({ isOpen, rewardName = '', onClose }: ClaimSuc
         }}
       >
         {/* Medal/Coin Icon */}
-        <img
+        <Image
           src="/images/spin-coin.svg"
           alt="reward-coin"
-          style={{
-            width: '80px',
-            height: '80px',
-          }}
+          width={80}
+          height={80}
         />
 
         {/* Congratulation Text */}
