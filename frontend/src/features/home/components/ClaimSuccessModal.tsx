@@ -18,8 +18,7 @@ export function ClaimSuccessModal({ isOpen, rewardName = '', onClose }: ClaimSuc
           gap: '32px',
           padding: '40px 16px',
           alignItems: 'center',
-          textAlign: 'center',
-        }}
+          textAlign: 'center'}}
       >
         {/* Medal/Coin Icon */}
         <Image
@@ -36,9 +35,8 @@ export function ClaimSuccessModal({ isOpen, rewardName = '', onClose }: ClaimSuc
               fontSize: '24px',
               fontWeight: 'bold',
               color: '#1F2937',
-              fontFamily: 'Kanit',
-              lineHeight: '1.2',
-            }}
+              
+              lineHeight: '1.2'}}
           >
             ยินดีด้วย
           </div>
@@ -47,9 +45,8 @@ export function ClaimSuccessModal({ isOpen, rewardName = '', onClose }: ClaimSuc
               style={{
                 fontSize: '14px',
                 color: '#6B7280',
-                fontFamily: 'Kanit',
-                lineHeight: '1.2',
-              }}
+                
+                lineHeight: '1.2'}}
             >
               คุณ{rewardName}
             </div>

@@ -13,8 +13,7 @@ export function ClaimButton({
   status,
   onClaim,
   loading = false,
-  className = '',
-}: ClaimButtonProps) {
+  className = ''}: ClaimButtonProps) {
   const defaultLabel = label || `รับรางวัล ${checkpointIndex ?? ''}`
   const width = 68.99998474121094
   const height = 21.76318359375
@@ -30,12 +29,11 @@ export function ClaimButton({
           height: `${height}px`,
           background: '#FF7B7B',
           color: '#FFFFFF',
-          fontFamily: 'Kanit',
+          
           fontSize: '10px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-        }}
+          justifyContent: 'center'}}
       >
         {`รับรางวัล ${checkpointIndex ?? ''} แล้ว`}
       </div>
@@ -52,12 +50,11 @@ export function ClaimButton({
           height: `${height}px`,
           background: '#DDDDDD',
           color: '#8B8B8B',
-          fontFamily: 'Kanit',
+          
           fontSize: '12px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-        }}
+          justifyContent: 'center'}}
       >
         {defaultLabel}
       </div>
@@ -77,12 +74,11 @@ export function ClaimButton({
         background: '#FF0004',
         color: '#FFFFFF',
         border: 'none',
-        fontFamily: 'Kanit',
+        
         fontSize: '12px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-      }}
+        justifyContent: 'center'}}
     >
       {loading ? 'กำลังรับ...' : defaultLabel}
     </button>

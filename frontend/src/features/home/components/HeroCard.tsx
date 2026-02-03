@@ -24,8 +24,7 @@ export function HeroCard({
   loading = false,
   displayName,
   className = '',
-  style = {},
-}: HeroCardProps) {
+  style = {}}: HeroCardProps) {
   const [claimingCheckpoint, setClaimingCheckpoint] = useState<number | null>(null)
   const [showClaimSuccess, setShowClaimSuccess] = useState(false)
   const [claimedRewardName, setClaimedRewardName] = useState('')
@@ -87,14 +86,13 @@ export function HeroCard({
             top: 12,
             left: '50%',
             transform: 'translateX(-50%)',
-            fontFamily: 'Kanit',
+            
             fontSize: '12px',
             fontWeight: 400,
             color: '#9CA3AF',
             opacity: 0.35,
             pointerEvents: 'none',
-            whiteSpace: 'nowrap',
-          }}
+            whiteSpace: 'nowrap'}}
         >
           {displayName}
         </div>
@@ -111,7 +109,7 @@ export function HeroCard({
             left: '-6%',
             borderRadius: '0px 20px 20px 0px',
             background: 'linear-gradient(135deg, #DC2626 0%, #991B1B 100%)',
-            fontFamily: 'Kanit',
+            
             fontWeight: 500,
             fontSize: '10px',
             lineHeight: '16px',
@@ -120,8 +118,7 @@ export function HeroCard({
             color: 'white',
             border: 'none',
             cursor: 'pointer',
-            padding: 0,
-          }}
+            padding: 0}}
         >
           แชร์คะแนน
         </button>
@@ -130,11 +127,11 @@ export function HeroCard({
         <div className="flex flex-col">
           <div
             className="text-gray-600"
-            style={{ fontFamily: 'Kanit', fontWeight: 600, fontSize: '16px', textAlign: 'right' }}
+            style={{  fontWeight: 600, fontSize: '16px', textAlign: 'right' }}
           >
             สะสมคะแนน
           </div>
-          <div className="text-gray-500" style={{ fontFamily: 'Kanit', fontWeight: 500, fontSize: '14px', textAlign: 'right' }}>
+          <div className="text-gray-500" style={{  fontWeight: 500, fontSize: '14px', textAlign: 'right' }}>
             คะแนนครบ 10,000 รับของขวัญ 1 รายการ
           </div>
         </div>
@@ -161,7 +158,7 @@ export function HeroCard({
 
               return (
                 <div key={`label-${checkpoint}`} style={{ position: 'absolute', left: leftStyle, top: 15, transform: transformStyle }}>
-                  <div style={{ fontFamily: 'Kanit', fontSize: 11, fontWeight: 400, color: '#8A8B8C', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                  <div style={{  fontSize: 11, fontWeight: 400, color: '#8A8B8C', textAlign: 'center', whiteSpace: 'nowrap' }}>
                     ครบ {checkpoint.toLocaleString()}
                   </div>
                 </div>
