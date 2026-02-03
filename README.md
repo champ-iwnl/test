@@ -2,7 +2,7 @@
 
 **Architecture**: DDD + Clean Architecture  
 **Frontend**: Next.js 16 (App Router) + Tailwind  
-**Backend**: Go (Fiber) + PostgreSQL
+**Backend**: Go (Fiber) + GORM + PostgreSQL
 
 ## ✨ Features
 - Player enter/profile
