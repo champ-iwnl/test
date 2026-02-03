@@ -40,17 +40,18 @@ export default function HomePage() {
   const [globalHistory, setGlobalHistory] = useState<SpinLog[]>([])
   const [personalHistory, setPersonalHistory] = useState<PersonalSpinLog[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
-  // Pagination / lazy-load state
+  
+  // Cursor-based pagination state
   const [globalLimit] = useState(20)
-  const [globalOffset, setGlobalOffset] = useState(0)
-  const [globalTotal, setGlobalTotal] = useState<number | null>(null)
+  const [globalCursor, setGlobalCursor] = useState<string | null>(null)
+  const [globalHasMore, setGlobalHasMore] = useState(true)
   const [loadingMoreGlobal, setLoadingMoreGlobal] = useState(false)
   const [globalLoadError, setGlobalLoadError] = useState<string | null>(null)
   const [globalRetryCount, setGlobalRetryCount] = useState(0)
 
   const [personalLimit] = useState(20)
-  const [personalOffset, setPersonalOffset] = useState(0)
-  const [personalTotal, setPersonalTotal] = useState<number | null>(null)
+  const [personalCursor, setPersonalCursor] = useState<string | null>(null)
+  const [personalHasMore, setPersonalHasMore] = useState(true)
   const [loadingMorePersonal, setLoadingMorePersonal] = useState(false)
   const [personalLoadError, setPersonalLoadError] = useState<string | null>(null)
   const [personalRetryCount, setPersonalRetryCount] = useState(0)
@@ -100,17 +101,19 @@ export default function HomePage() {
     setLoadingHistory(true)
     const fetcher = async () => {
       if (activeTab === 'global') {
-        // reset paging when switching tabs
-        setGlobalOffset(0)
-        const response: GlobalHistoryResponse = await historyService.getGlobalHistory(globalLimit, 0)
+        // reset cursor when switching tabs
+        setGlobalCursor(null)
+        const response = await historyService.getGlobalHistory(globalLimit)
         setGlobalHistory(response.data || [])
-        setGlobalTotal(response.total ?? null)
+        setGlobalCursor(response.next_cursor || null)
+        setGlobalHasMore(response.has_more)
       }
       if (activeTab === 'personal') {
-        setPersonalOffset(0)
-        const response: PersonalHistoryResponse = await historyService.getPersonalHistory(player.id, personalLimit, 0)
+        setPersonalCursor(null)
+        const response = await historyService.getPersonalHistory(player.id, personalLimit)
         setPersonalHistory(response.data || [])
-        setPersonalTotal(response.total ?? null)
+        setPersonalCursor(response.next_cursor || null)
+        setPersonalHasMore(response.has_more)
       }
     }
 
@@ -121,23 +124,17 @@ export default function HomePage() {
       .finally(() => setLoadingHistory(false))
   }, [activeTab, player])
 
-  const shouldLoadMoreGlobal =
-    globalTotal !== null && globalOffset + globalHistory.length < globalTotal
-  const shouldLoadMorePersonal =
-    personalTotal !== null && personalOffset + personalHistory.length < personalTotal
-
-  // Load more handlers
+  // Load more handlers (cursor-based)
   const loadMoreGlobal = async () => {
     if (loadingMoreGlobal) return
-    if (!shouldLoadMoreGlobal) return
+    if (!globalHasMore) return
     setLoadingMoreGlobal(true)
     setGlobalLoadError(null)
     try {
-      const nextOffset = globalOffset + globalLimit
-      const response: GlobalHistoryResponse = await historyService.getGlobalHistory(globalLimit, nextOffset)
+      const response = await historyService.getGlobalHistory(globalLimit, globalCursor || undefined)
       setGlobalHistory((prev) => [...prev, ...(response.data || [])])
-      setGlobalOffset(nextOffset)
-      setGlobalTotal(response.total ?? null)
+      setGlobalCursor(response.next_cursor || null)
+      setGlobalHasMore(response.has_more)
       setGlobalRetryCount(0)
     } catch (e) {
       setGlobalLoadError('โหลดประวัติทั้งหมดไม่สำเร็จ')
@@ -149,15 +146,14 @@ export default function HomePage() {
   const loadMorePersonal = async () => {
     if (loadingMorePersonal) return
     if (!player) return
-    if (!shouldLoadMorePersonal) return
+    if (!personalHasMore) return
     setLoadingMorePersonal(true)
     setPersonalLoadError(null)
     try {
-      const nextOffset = personalOffset + personalLimit
-      const response: PersonalHistoryResponse = await historyService.getPersonalHistory(player.id, personalLimit, nextOffset)
+      const response = await historyService.getPersonalHistory(player.id, personalLimit, personalCursor || undefined)
       setPersonalHistory((prev) => [...prev, ...(response.data || [])])
-      setPersonalOffset(nextOffset)
-      setPersonalTotal(response.total ?? null)
+      setPersonalCursor(response.next_cursor || null)
+      setPersonalHasMore(response.has_more)
       setPersonalRetryCount(0)
     } catch (e) {
       setPersonalLoadError('โหลดประวัติของฉันไม่สำเร็จ')
@@ -191,13 +187,13 @@ export default function HomePage() {
         if (!entry?.isIntersecting) return
 
         if (activeTab === 'global') {
-          if (shouldLoadMoreGlobal && !loadingMoreGlobal) {
+          if (globalHasMore && !loadingMoreGlobal) {
             loadMoreGlobal()
           }
         }
 
         if (activeTab === 'personal') {
-          if (shouldLoadMorePersonal && !loadingMorePersonal) {
+          if (personalHasMore && !loadingMorePersonal) {
             loadMorePersonal()
           }
         }
@@ -209,12 +205,12 @@ export default function HomePage() {
     return () => observer.disconnect()
   }, [
     activeTab,
-    shouldLoadMoreGlobal,
-    shouldLoadMorePersonal,
+    globalHasMore,
+    personalHasMore,
     loadingMoreGlobal,
     loadingMorePersonal,
-    globalOffset,
-    personalOffset,
+    globalCursor,
+    personalCursor,
   ])
 
   const totalPoints = player?.total_points ?? 0
@@ -311,7 +307,7 @@ export default function HomePage() {
                 <InfiniteScrollSentinel
                   loading={activeTab === 'global' ? loadingMoreGlobal : loadingMorePersonal}
                   error={activeTab === 'global' ? globalLoadError : personalLoadError}
-                  hasMore={activeTab === 'global' ? shouldLoadMoreGlobal : shouldLoadMorePersonal}
+                  hasMore={activeTab === 'global' ? globalHasMore : personalHasMore}
                   onRetry={activeTab === 'global' ? retryLoadMoreGlobal : retryLoadMorePersonal}
                 />
                 <div ref={sentinelRef} className="h-4" />

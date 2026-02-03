@@ -84,7 +84,7 @@ const docTemplate = `{
         },
         "/history/global": {
             "get": {
-                "description": "Get paginated global spin history with player nicknames",
+                "description": "Get cursor-paginated global spin history with player nicknames - optimized for large datasets",
                 "consumes": [
                     "application/json"
                 ],
@@ -104,10 +104,9 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "Number of items to skip",
-                        "name": "offset",
+                        "type": "string",
+                        "description": "Cursor for next page (from previous response)",
+                        "name": "cursor",
                         "in": "query"
                     }
                 ],
@@ -135,7 +134,7 @@ const docTemplate = `{
         },
         "/history/{player_id}": {
             "get": {
-                "description": "Get paginated spin history for a specific player",
+                "description": "Get cursor-paginated spin history for a specific player - optimized for large datasets",
                 "consumes": [
                     "application/json"
                 ],
@@ -162,10 +161,9 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "Number of items to skip",
-                        "name": "offset",
+                        "type": "string",
+                        "description": "Cursor for next page (from previous response)",
+                        "name": "cursor",
                         "in": "query"
                     }
                 ],
@@ -489,14 +487,11 @@ const docTemplate = `{
                         "$ref": "#/definitions/application.GlobalSpinLogDTO"
                     }
                 },
-                "limit": {
-                    "type": "integer"
+                "has_more": {
+                    "type": "boolean"
                 },
-                "offset": {
-                    "type": "integer"
-                },
-                "total": {
-                    "type": "integer"
+                "next_cursor": {
+                    "type": "string"
                 }
             }
         },
@@ -529,14 +524,11 @@ const docTemplate = `{
                         "$ref": "#/definitions/application.PersonalSpinLogDTO"
                     }
                 },
-                "limit": {
-                    "type": "integer"
+                "has_more": {
+                    "type": "boolean"
                 },
-                "offset": {
-                    "type": "integer"
-                },
-                "total": {
-                    "type": "integer"
+                "next_cursor": {
+                    "type": "string"
                 }
             }
         },

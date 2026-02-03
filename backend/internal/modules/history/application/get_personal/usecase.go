@@ -21,17 +21,18 @@ func New(repo domain.SpinLogRepository, cfg *config.PaginationConfig) *UseCase {
 	}
 }
 
+// Execute handles cursor-based pagination
 func (uc *UseCase) Execute(ctx context.Context, req application.GetPersonalRequest) (*application.PersonalHistoryResponse, error) {
 	if req.PlayerID == "" {
 		return nil, errors.New("player ID is required")
 	}
 
-	params := shared.NewPaginationParams(req.Limit, req.Offset, shared.PaginationConfig{
+	params := shared.NewCursorParams(req.Limit, req.Cursor, shared.PaginationConfig{
 		DefaultLimit:  uc.paginationCfg.DefaultLimit,
 		MaxLimit:      uc.paginationCfg.MaxLimit,
 		DefaultOffset: uc.paginationCfg.DefaultOffset,
 	})
-	result, err := uc.spinLogRepo.ListByPlayer(ctx, req.PlayerID, params)
+	result, err := uc.spinLogRepo.ListByPlayerCursor(ctx, req.PlayerID, params)
 	if err != nil {
 		return nil, err
 	}
@@ -47,9 +48,8 @@ func (uc *UseCase) Execute(ctx context.Context, req application.GetPersonalReque
 	}
 
 	return &application.PersonalHistoryResponse{
-		Data:   dtos,
-		Total:  result.Total,
-		Limit:  result.Limit,
-		Offset: result.Offset,
+		Data:       dtos,
+		NextCursor: result.NextCursor,
+		HasMore:    result.HasMore,
 	}, nil
 }

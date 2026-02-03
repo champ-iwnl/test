@@ -49,18 +49,17 @@ export interface PersonalSpinLog {
   created_at: string
 }
 
+// History responses (cursor-based)
 export interface GlobalHistoryResponse {
   data: SpinLog[]
-  total: number
-  limit: number
-  offset: number
+  next_cursor?: string
+  has_more: boolean
 }
 
 export interface PersonalHistoryResponse {
   data: PersonalSpinLog[]
-  total: number
-  limit: number
-  offset: number
+  next_cursor?: string
+  has_more: boolean
 }
 
 // Rewards

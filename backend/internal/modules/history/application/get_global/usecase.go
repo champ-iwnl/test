@@ -20,13 +20,14 @@ func New(repo domain.SpinLogRepository, cfg *config.PaginationConfig) *UseCase {
 	}
 }
 
+// Execute handles cursor-based pagination
 func (uc *UseCase) Execute(ctx context.Context, req application.GetGlobalRequest) (*application.GlobalHistoryResponse, error) {
-	params := shared.NewPaginationParams(req.Limit, req.Offset, shared.PaginationConfig{
+	params := shared.NewCursorParams(req.Limit, req.Cursor, shared.PaginationConfig{
 		DefaultLimit:  uc.paginationCfg.DefaultLimit,
 		MaxLimit:      uc.paginationCfg.MaxLimit,
 		DefaultOffset: uc.paginationCfg.DefaultOffset,
 	})
-	result, err := uc.spinLogRepo.ListAll(ctx, params)
+	result, err := uc.spinLogRepo.ListAllCursor(ctx, params)
 	if err != nil {
 		return nil, err
 	}
@@ -43,9 +44,8 @@ func (uc *UseCase) Execute(ctx context.Context, req application.GetGlobalRequest
 	}
 
 	return &application.GlobalHistoryResponse{
-		Data:   dtos,
-		Total:  result.Total,
-		Limit:  result.Limit,
-		Offset: result.Offset,
+		Data:       dtos,
+		NextCursor: result.NextCursor,
+		HasMore:    result.HasMore,
 	}, nil
 }

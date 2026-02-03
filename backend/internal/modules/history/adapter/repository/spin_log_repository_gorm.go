@@ -35,24 +35,52 @@ func (r *SpinLogRepositoryGorm) FindByID(ctx context.Context, id *domain.SpinLog
 	return r.toDomain(&model)
 }
 
-func (r *SpinLogRepositoryGorm) ListAll(ctx context.Context, params shared.PaginationParams) (*domain.SpinLogListResult, error) {
+func (r *SpinLogRepositoryGorm) CountTodayByPlayer(ctx context.Context, playerID string) (int, error) {
+	var count int64
+	today := time.Now().Truncate(24 * time.Hour)
+	tomorrow := today.Add(24 * time.Hour)
+	err := r.db.WithContext(ctx).
+		Model(&SpinLogModel{}).
+		Where("player_id = ? AND created_at >= ? AND created_at < ?", playerID, today, tomorrow).
+		Count(&count).Error
+	return int(count), err
+}
+
+// ========== Cursor-based Pagination Methods ==========
+
+func (r *SpinLogRepositoryGorm) ListAllCursor(ctx context.Context, params shared.CursorParams) (*domain.SpinLogCursorResult, error) {
 	var models []*SpinLogModel
-	var total int64
-	if err := r.db.WithContext(ctx).Model(&SpinLogModel{}).Count(&total).Error; err != nil {
+
+	query := r.db.WithContext(ctx).
+		Preload("Player").
+		Order("created_at DESC, id DESC")
+
+	// Apply cursor filter if provided
+	cursorData, err := shared.DecodeCursor(params.Cursor)
+	if err != nil {
 		return nil, err
 	}
+	if cursorData != nil {
+		// Seek to position after cursor using composite comparison
+		query = query.Where(
+			"(created_at < ?) OR (created_at = ? AND id < ?)",
+			cursorData.CreatedAt, cursorData.CreatedAt, cursorData.ID,
+		)
+	}
 
-	err := r.db.WithContext(ctx).
-		Preload("Player").
-		Order("created_at DESC").
-		Limit(params.Limit).
-		Offset(params.Offset).
-		Find(&models).Error
+	// Fetch limit+1 to check if there are more results
+	err = query.Limit(params.Limit + 1).Find(&models).Error
 	if err != nil {
 		return nil, err
 	}
 
+	hasMore := len(models) > params.Limit
+	if hasMore {
+		models = models[:params.Limit] // Trim extra item
+	}
+
 	data := make([]*domain.SpinLogWithPlayer, len(models))
+	var nextCursor string
 	for i, model := range models {
 		spinLog, err := r.toDomain(model)
 		if err != nil {
@@ -66,34 +94,51 @@ func (r *SpinLogRepositoryGorm) ListAll(ctx context.Context, params shared.Pagin
 			SpinLog:        spinLog,
 			PlayerNickname: nickname,
 		}
+		// Generate cursor from last item
+		if i == len(models)-1 && hasMore {
+			nextCursor = shared.EncodeCursor(model.CreatedAt, model.ID)
+		}
 	}
 
-	return &domain.SpinLogListResult{
-		Data:   data,
-		Total:  total,
-		Limit:  params.Limit,
-		Offset: params.Offset,
+	return &domain.SpinLogCursorResult{
+		Data:       data,
+		NextCursor: nextCursor,
+		HasMore:    hasMore,
 	}, nil
 }
 
-func (r *SpinLogRepositoryGorm) ListByPlayer(ctx context.Context, playerID string, params shared.PaginationParams) (*domain.SpinLogListResult, error) {
+func (r *SpinLogRepositoryGorm) ListByPlayerCursor(ctx context.Context, playerID string, params shared.CursorParams) (*domain.SpinLogCursorResult, error) {
 	var models []*SpinLogModel
-	var total int64
-	if err := r.db.WithContext(ctx).Model(&SpinLogModel{}).Where("player_id = ?", playerID).Count(&total).Error; err != nil {
+
+	query := r.db.WithContext(ctx).
+		Where("player_id = ?", playerID).
+		Order("created_at DESC, id DESC")
+
+	// Apply cursor filter if provided
+	cursorData, err := shared.DecodeCursor(params.Cursor)
+	if err != nil {
 		return nil, err
 	}
+	if cursorData != nil {
+		query = query.Where(
+			"(created_at < ?) OR (created_at = ? AND id < ?)",
+			cursorData.CreatedAt, cursorData.CreatedAt, cursorData.ID,
+		)
+	}
 
-	err := r.db.WithContext(ctx).
-		Where("player_id = ?", playerID).
-		Order("created_at DESC").
-		Limit(params.Limit).
-		Offset(params.Offset).
-		Find(&models).Error
+	// Fetch limit+1 to check if there are more results
+	err = query.Limit(params.Limit + 1).Find(&models).Error
 	if err != nil {
 		return nil, err
 	}
 
+	hasMore := len(models) > params.Limit
+	if hasMore {
+		models = models[:params.Limit]
+	}
+
 	data := make([]*domain.SpinLogWithPlayer, len(models))
+	var nextCursor string
 	for i, model := range models {
 		spinLog, err := r.toDomain(model)
 		if err != nil {
@@ -101,27 +146,18 @@ func (r *SpinLogRepositoryGorm) ListByPlayer(ctx context.Context, playerID strin
 		}
 		data[i] = &domain.SpinLogWithPlayer{
 			SpinLog:        spinLog,
-			PlayerNickname: "", // Not needed for personal history
+			PlayerNickname: "",
+		}
+		if i == len(models)-1 && hasMore {
+			nextCursor = shared.EncodeCursor(model.CreatedAt, model.ID)
 		}
 	}
 
-	return &domain.SpinLogListResult{
-		Data:   data,
-		Total:  total,
-		Limit:  params.Limit,
-		Offset: params.Offset,
+	return &domain.SpinLogCursorResult{
+		Data:       data,
+		NextCursor: nextCursor,
+		HasMore:    hasMore,
 	}, nil
-}
-
-func (r *SpinLogRepositoryGorm) CountTodayByPlayer(ctx context.Context, playerID string) (int, error) {
-	var count int64
-	today := time.Now().Truncate(24 * time.Hour)
-	tomorrow := today.Add(24 * time.Hour)
-	err := r.db.WithContext(ctx).
-		Model(&SpinLogModel{}).
-		Where("player_id = ? AND created_at >= ? AND created_at < ?", playerID, today, tomorrow).
-		Count(&count).Error
-	return int(count), err
 }
 
 func (r *SpinLogRepositoryGorm) toModel(spinLog *domain.SpinLog) *SpinLogModel {

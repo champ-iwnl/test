@@ -57,12 +57,10 @@ definitions:
         items:
           $ref: '#/definitions/application.GlobalSpinLogDTO'
         type: array
-      limit:
-        type: integer
-      offset:
-        type: integer
-      total:
-        type: integer
+      has_more:
+        type: boolean
+      next_cursor:
+        type: string
     type: object
   application.GlobalSpinLogDTO:
     properties:
@@ -83,12 +81,10 @@ definitions:
         items:
           $ref: '#/definitions/application.PersonalSpinLogDTO'
         type: array
-      limit:
-        type: integer
-      offset:
-        type: integer
-      total:
-        type: integer
+      has_more:
+        type: boolean
+      next_cursor:
+        type: string
     type: object
   application.PersonalSpinLogDTO:
     properties:
@@ -216,7 +212,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get paginated spin history for a specific player
+      description: Get cursor-paginated spin history for a specific player - optimized
+        for large datasets
       parameters:
       - description: Player ID
         in: path
@@ -228,11 +225,10 @@ paths:
         in: query
         name: limit
         type: integer
-      - default: 0
-        description: Number of items to skip
+      - description: Cursor for next page (from previous response)
         in: query
-        name: offset
-        type: integer
+        name: cursor
+        type: string
       produces:
       - application/json
       responses:
@@ -259,18 +255,18 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get paginated global spin history with player nicknames
+      description: Get cursor-paginated global spin history with player nicknames
+        - optimized for large datasets
       parameters:
       - default: 20
         description: Number of items per page
         in: query
         name: limit
         type: integer
-      - default: 0
-        description: Number of items to skip
+      - description: Cursor for next page (from previous response)
         in: query
-        name: offset
-        type: integer
+        name: cursor
+        type: string
       produces:
       - application/json
       responses:

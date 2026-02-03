@@ -25,14 +25,14 @@ func NewHistoryHandler(
 	}
 }
 
-// GetGlobal handles GET /history/global
+// GetGlobal handles GET /history/global (cursor-based)
 // @Summary Get global spin history
-// @Description Get paginated global spin history with player nicknames
+// @Description Get cursor-paginated global spin history with player nicknames - optimized for large datasets
 // @Tags History
 // @Accept json
 // @Produce json
 // @Param limit query int false "Number of items per page" default(20)
-// @Param offset query int false "Number of items to skip" default(0)
+// @Param cursor query string false "Cursor for next page (from previous response)"
 // @Success 200 {object} application.GlobalHistoryResponse
 // @Failure 400 {object} object
 // @Failure 500 {object} object
@@ -45,21 +45,21 @@ func (h *HistoryHandler) GetGlobal(c *fiber.Ctx) error {
 
 	resp, err := h.getGlobalUC.Execute(c.Context(), req)
 	if err != nil {
-		return httputil.Error(c, constants.StatusInternalServerError, "INTERNAL_ERROR", "Failed to get global history")
+		return httputil.BadRequest(c, constants.ErrCodeValidationFailed, err.Error())
 	}
 
 	return c.JSON(resp)
 }
 
-// GetPersonal handles GET /history/:player_id
+// GetPersonal handles GET /history/:player_id (cursor-based)
 // @Summary Get personal spin history
-// @Description Get paginated spin history for a specific player
+// @Description Get cursor-paginated spin history for a specific player - optimized for large datasets
 // @Tags History
 // @Accept json
 // @Produce json
 // @Param player_id path string true "Player ID"
 // @Param limit query int false "Number of items per page" default(20)
-// @Param offset query int false "Number of items to skip" default(0)
+// @Param cursor query string false "Cursor for next page (from previous response)"
 // @Success 200 {object} application.PersonalHistoryResponse
 // @Failure 400 {object} object
 // @Failure 404 {object} object
@@ -67,16 +67,14 @@ func (h *HistoryHandler) GetGlobal(c *fiber.Ctx) error {
 // @Router /history/{player_id} [get]
 func (h *HistoryHandler) GetPersonal(c *fiber.Ctx) error {
 	var req application.GetPersonalRequest
-	if err := c.ParamsParser(&req); err != nil {
-		return httputil.BadRequest(c, constants.ErrCodeValidationFailed, "Invalid path parameters")
-	}
+	req.PlayerID = c.Params("player_id")
 	if err := c.QueryParser(&req); err != nil {
 		return httputil.BadRequest(c, constants.ErrCodeValidationFailed, "Invalid query parameters")
 	}
 
 	resp, err := h.getPersonalUC.Execute(c.Context(), req)
 	if err != nil {
-		return httputil.Error(c, constants.StatusInternalServerError, "INTERNAL_ERROR", "Failed to get personal history")
+		return httputil.BadRequest(c, constants.ErrCodeValidationFailed, err.Error())
 	}
 
 	return c.JSON(resp)
