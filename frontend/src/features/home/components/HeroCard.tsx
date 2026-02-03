@@ -76,7 +76,7 @@ export function HeroCard({
 
   return (
     <div
-      className={`rounded-2xl bg-white shadow-md border border-gray-100 overflow-hidden p-4 ${className}`}
+      className={`rounded-2xl bg-white shadow-md border border-black overflow-hidden p-4 ${className}`}
       style={{ width: 'clamp(300px, 92%, 500px)', height: '200px', position: 'relative', ...style }}
     >
       {displayName ? (
