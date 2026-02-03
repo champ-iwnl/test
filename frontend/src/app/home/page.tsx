@@ -249,6 +249,7 @@ export default function HomePage() {
             totalPoints={totalPoints}
             claimedCheckpoints={claimedCheckpoints}
             loading={loadingProfile}
+            displayName={player?.nickname}
             onClaim={handleClaimCheckpoint}
           />
         </div>
@@ -264,7 +265,7 @@ export default function HomePage() {
               items={[
                 { id: 'global', label: 'ประวัติทั่วโลก' },
                 { id: 'personal', label: 'ประวัติของฉัน' },
-                { id: 'rewards', label: 'รางวัลที่ได้รับแล้ว' },
+                { id: 'rewards', label: 'ประวัติรางวัลของฉัน' },
               ]}
               activeId={activeTab}
               onChange={(id) => setActiveTab(id as typeof activeTab)}
@@ -286,7 +287,7 @@ export default function HomePage() {
             ) : null}
 
             {!loadingRewardHistory && activeTab === 'rewards' && rewardHistory.length === 0 ? (
-              <div className="text-center text-sm text-gray-400 py-4">ยังไม่มีรางวัลที่ได้รับ</div>
+              <div className="text-center text-sm text-gray-400 py-4">ยังไม่มีประวัติการรับรางวัล</div>
             ) : null}
 
             {activeTab === 'global' &&

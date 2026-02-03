@@ -14,7 +14,7 @@ export function PersonalHistoryItem({ item, nickname, className }: PersonalHisto
     <HistoryListItem
       avatar={<Image src="/images/avatar.svg" alt="avatar" width={48} height={48} style={{ borderRadius: 32, display: 'block' }} />}
       title={nickname}
-      subtitle={`รางวัล: ${formatPoints(item.points_gained)} | เล่นเมื่อ ${formatDate(item.created_at)}`}
+      subtitle={`ได้รับเมื่อ ${formatDate(item.created_at)}`}
       timestamp=""
       className={className}
     />

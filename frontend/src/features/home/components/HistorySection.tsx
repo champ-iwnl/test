@@ -31,7 +31,7 @@ interface HistorySectionProps {
 const TAB_ITEMS = [
   { id: 'global', label: 'ประวัติทั่วโลก' },
   { id: 'personal', label: 'ประวัติของฉัน' },
-  { id: 'rewards', label: 'รางวัลที่ได้รับแล้ว' },
+  { id: 'rewards', label: 'ประวัติการรับรางวัล' },
 ] as const
 
 export function HistorySection({
@@ -81,7 +81,7 @@ export function HistorySection({
 
         {!loading && activeTab === 'rewards' && rewardHistory.length === 0 && (
           <div className="text-center text-sm text-gray-400 py-4">
-            ยังไม่มีรางวัลที่ได้รับ
+            ยังไม่มีประวัติการรับรางวัล
           </div>
         )}
 
