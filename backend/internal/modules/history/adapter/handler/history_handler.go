@@ -40,7 +40,7 @@ func NewHistoryHandler(
 func (h *HistoryHandler) GetGlobal(c *fiber.Ctx) error {
 	var req application.GetGlobalRequest
 	if err := c.QueryParser(&req); err != nil {
-		return httputil.BadRequest(c, constants.ErrCodeValidationFailed, "Invalid query parameters")
+		return httputil.BadRequest(c, constants.ErrCodeValidationFailed, err.Error())
 	}
 
 	resp, err := h.getGlobalUC.Execute(c.Context(), req)
@@ -71,7 +71,7 @@ func (h *HistoryHandler) GetPersonal(c *fiber.Ctx) error {
 		return httputil.BadRequest(c, constants.ErrCodeValidationFailed, "Invalid path parameters")
 	}
 	if err := c.QueryParser(&req); err != nil {
-		return httputil.BadRequest(c, constants.ErrCodeValidationFailed, "Invalid query parameters")
+		return httputil.BadRequest(c, constants.ErrCodeValidationFailed, err.Error())
 	}
 
 	resp, err := h.getPersonalUC.Execute(c.Context(), req)
