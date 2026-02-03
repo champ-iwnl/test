@@ -28,16 +28,16 @@ export function ClaimButton({
           borderRadius: `${borderRadius}px`,
           width: `${width}px`,
           height: `${height}px`,
-          background: '#DDDDDD',
-          color: '#8B8B8B',
+          background: '#FF7B7B',
+          color: '#FFFFFF',
           fontFamily: 'Kanit',
-          fontSize: '12px',
+          fontSize: '10px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        {`รับแล้ว`}
+        {`รับรางวัล ${checkpointIndex ?? ''} แล้ว`}
       </div>
     )
   }
